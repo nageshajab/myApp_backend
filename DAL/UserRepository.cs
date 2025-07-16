@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
 using BCrypt.Net;
-namespace myazfunction
+using myazfunction.Models;
+namespace myazfunction.DAL
 {
     public class UserRepository
     {
@@ -24,12 +25,12 @@ namespace myazfunction
 
         public async Task<Users> GetUserAsync(string id)
         {
-            return await _users.Find<Users>(user => user.Id == id).FirstOrDefaultAsync();
+            return await _users.Find(user => user.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<Users> GetUserByUserNameAsync(string username)
         {
-            return await _users.Find<Users>(user => user.UserName == username).FirstOrDefaultAsync();
+            return await _users.Find(user => user.UserName == username).FirstOrDefaultAsync();
         }
 
         public async Task CreateUserAsync(Users user)

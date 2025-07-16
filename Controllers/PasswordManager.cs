@@ -7,13 +7,15 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using myazfunction.DAL;
+using myazfunction.Models;
 using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace myazfunction
+namespace myazfunction.Controllers
 {
     public class PasswordsPage
     {

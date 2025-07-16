@@ -14,7 +14,7 @@ using Azure;
 using Azure.Communication.Email;
 using Microsoft.Extensions.Configuration;
 
-namespace myazfunction
+namespace myazfunction.Controllers
 {
     public class MyEmailAddress
     {

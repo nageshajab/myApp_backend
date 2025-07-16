@@ -5,23 +5,24 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using myazfunction.DAL;
+using myazfunction.Models;
 using Newtonsoft.Json;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace myazfunction
+namespace myazfunction.Controllers
 {
     public class UserManager
     {
         private readonly ILogger<PasswordManager> _logger;
-        private readonly MongoDbContext _context;
         private readonly UserRepository _userRepository;
 
         public UserManager(ILogger<PasswordManager> log, UserRepository userRepository)
         {
             _logger = log;
-            this._userRepository = userRepository;
+            _userRepository = userRepository;
         }
 
         [FunctionName("register")]
@@ -54,7 +55,7 @@ namespace myazfunction
                 return new BadRequestObjectResult("Invalid password data.");
             }
 
-            await this._userRepository.CreateUserAsync(newUser);
+            await _userRepository.CreateUserAsync(newUser);
 
             return new OkObjectResult(new { message = "Password added successfully", data = newUser });
         }
@@ -98,7 +99,7 @@ namespace myazfunction
                 return new BadRequestObjectResult("UserId is required.");
             }
 
-            var result = await this._userRepository.GetAllUsersAsync();
+            var result = await _userRepository.GetAllUsersAsync();
 
             return new OkObjectResult(result);
         }
@@ -127,7 +128,7 @@ namespace myazfunction
             {
                 return new BadRequestObjectResult("Invalid change password data ");
             }
-            var user= await this._userRepository.GetUserAsync(changePassword.Id);
+            var user= await _userRepository.GetUserAsync(changePassword.Id);
             if (user == null)
             {
                 return new NotFoundObjectResult("User not found.");
@@ -140,7 +141,7 @@ namespace myazfunction
                 }
             }
             user.Password = changePassword.password;
-            await this._userRepository.UpdateUserAsync(user.Id, user);
+            await _userRepository.UpdateUserAsync(user.Id, user);
 
             return new OkObjectResult(new { message = "Password updated successfully" });
 
@@ -180,7 +181,7 @@ namespace myazfunction
                 return new BadRequestObjectResult("Password Id is required.");
             }
 
-            await this._userRepository.DeleteUserAsync(id);
+            await _userRepository.DeleteUserAsync(id);
 
             return new OkObjectResult(new { message = "Password deleted successfully" });
 
@@ -213,7 +214,7 @@ namespace myazfunction
                 return new BadRequestObjectResult("Password Id is required.");
             }
 
-            var password = await this._userRepository.GetUserAsync(id);
+            var password = await _userRepository.GetUserAsync(id);
             return new OkObjectResult(password);
 
         }

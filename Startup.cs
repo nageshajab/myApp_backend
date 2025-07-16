@@ -2,8 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using myazfunction.DAL;
 
 [assembly: FunctionsStartup(typeof(myazfunction.Startup))]
 
@@ -25,8 +24,8 @@ namespace myazfunction
                 return options.Value;
             });
             builder.Services.AddSingleton<MongoDbContext>();
-            builder.Services.AddSingleton<UserRepository>()        ;
-            
+            builder.Services.AddSingleton<UserRepository>();
+            builder.Services.AddSingleton<DatesRepository>();
         }
     }
 }
