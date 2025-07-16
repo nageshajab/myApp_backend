@@ -68,7 +68,7 @@ namespace myazfunction
         }
 
         [FunctionName("GetUsers")]
-        public async Task<IActionResult> Run(
+        public async Task<IActionResult> GetUsers(
        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
        ILogger log)
         {
@@ -103,11 +103,8 @@ namespace myazfunction
             return new OkObjectResult(result);
         }
 
-        [FunctionName("UserUpdate")]
-        [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
-        [OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> PasswordUpdate(
+        [FunctionName("ChangePassword")]
+        public async Task<IActionResult> UserUpdate(
       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
@@ -123,24 +120,46 @@ namespace myazfunction
             }
             // Read and deserialize the request body
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            Users users = JsonConvert.DeserializeObject<Users>(requestBody);
+            ChangePassword changePassword= JsonConvert.DeserializeObject<ChangePassword>(requestBody);
 
             // Validate the object
-            if (!IsValidUser(users))
+            if (!IsValidChangePassword(changePassword))
             {
-                return new BadRequestObjectResult("Invalid password data ");
+                return new BadRequestObjectResult("Invalid change password data ");
             }
-            await this._userRepository.UpdateUserAsync(users.Id, users);
+            var user= await this._userRepository.GetUserAsync(changePassword.Id);
+            if (user == null)
+            {
+                return new NotFoundObjectResult("User not found.");
+            }
+            else
+            {
+                if (!BCrypt.Net.BCrypt.Verify(changePassword.currentPassword, user.Password))
+                {
+                    return new BadRequestObjectResult("Current password is incorrect.");
+                }
+            }
+            user.Password = changePassword.password;
+            await this._userRepository.UpdateUserAsync(user.Id, user);
 
             return new OkObjectResult(new { message = "Password updated successfully" });
 
+        }
+
+        private bool IsValidChangePassword(ChangePassword cp)
+        {
+            return cp!= null &&
+                 !string.IsNullOrWhiteSpace(cp.UserName) &&
+                 !string.IsNullOrWhiteSpace(cp.currentPassword) &&
+                 !string.IsNullOrWhiteSpace(cp.Id) &&
+                 !string.IsNullOrWhiteSpace(cp.password);
         }
 
         [FunctionName("UserDelete")]
         [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
         [OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> PasswordDelete(
+        public async Task<IActionResult> UserDelete(
       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request to delete a password.");
@@ -171,7 +190,7 @@ namespace myazfunction
         [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
         [OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> PasswordGet(
+        public async Task<IActionResult> UserGet(
       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
 

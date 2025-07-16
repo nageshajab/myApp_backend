@@ -29,7 +29,7 @@ namespace myazfunction
 
         public async Task<Users> GetUserByUserNameAsync(string username)
         {
-            return await _users.Find<Users>(user => user.UserName ==username).FirstOrDefaultAsync();
+            return await _users.Find<Users>(user => user.UserName == username).FirstOrDefaultAsync();
         }
 
         public async Task CreateUserAsync(Users user)
@@ -60,6 +60,20 @@ namespace myazfunction
             }
 
             return null;
+        }
+
+        public async Task<Users> ChangePasswordAsync(ChangePassword cp)
+        {
+            var user = await _users.Find(u => u.Id == cp.Id).FirstOrDefaultAsync();
+
+            if (user != null && BCrypt.Net.BCrypt.Verify(cp.currentPassword, user.Password))
+            {
+                user.Password = cp.password;
+                await UpdateUserAsync(cp.Id, user);
+            }
+            else { }
+
+                return null;
         }
 
 

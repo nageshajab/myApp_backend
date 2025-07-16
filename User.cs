@@ -16,4 +16,15 @@ namespace myazfunction
 
         public bool Isverified { get; set; }
     }
+
+    public class ChangePassword
+    {
+        public string Id { get; set; }
+
+        public string UserName { get; set; }
+
+        public string currentPassword { get; set; }
+
+        public string password { get; set; }
+    }
 }
