@@ -1,8 +1,11 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace myazfunction.Models
 {
+
     public class Dates
     {
         [BsonId]
@@ -15,6 +18,7 @@ namespace myazfunction.Models
 
         public string Date { get; set; }
 
+        [NotMapped]
         public string Duration { get; set; }
 
         public bool isRecurring { get; set; }
@@ -22,8 +26,37 @@ namespace myazfunction.Models
         public RecurringEvent RecurringEvent { get; set; }
 
         public string userid { get; set; }
+
+        public static string CalculateDuration(DateTime pastDate)
+        {
+            DateTime now = DateTime.Now;
+            int years = 0;
+            int months = 0;
+            int days = 0;
+
+            // Calculate years
+            while (pastDate.AddYears(1) <= now)
+            {
+                pastDate = pastDate.AddYears(1);
+                years++;
+            }
+
+            // Calculate months
+            while (pastDate.AddMonths(1) <= now)
+            {
+                pastDate = pastDate.AddMonths(1);
+                months++;
+            }
+
+            // Calculate days
+            days = (now - pastDate).Days;
+
+            return $"{years} years, {months} months, {days} days";
+        }
+
+
     }
-    
+
     public class RecurringEvent
     {
         public Frequency Frequency { get; set; }        

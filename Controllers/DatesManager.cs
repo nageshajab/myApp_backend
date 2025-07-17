@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using myazfunction.DAL;
 using myazfunction.Models;
 using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -84,7 +85,7 @@ namespace myazfunction.Controllers
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             string userId = data?.userid;
-            string searchText = data?.searchText;
+            string searchText = data?.searchtxt;
             int pageNumber = data?.pageNumber;
             pageNumber = pageNumber > 0 ? pageNumber : 1;
 
@@ -173,7 +174,7 @@ namespace myazfunction.Controllers
 
         [FunctionName("DateGet")]      
         public async Task<IActionResult> DateGet(
-      [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
+      [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req)
         {
 
             _logger.LogInformation("C# HTTP trigger function processed a request to get a password by Id.");
@@ -195,8 +196,10 @@ namespace myazfunction.Controllers
                 return new BadRequestObjectResult("Date Id is required.");
             }
 
-            var password = await _datesRepository.GetDateAsync(id);
-            return new OkObjectResult(password);
+            var date = await _datesRepository.GetDateAsync(id);
+            date.Duration=Dates.CalculateDuration(DateTime.Parse(date.Date));
+
+            return new OkObjectResult(date);
         }
 
     }

@@ -42,9 +42,28 @@ namespace myazfunction.DAL
                 .Limit(10)
                 .ToListAsync();
 
+            List<Dates> reurnval= new List<Dates>();
+            foreach(Dates dt in documents)
+            {
+                Dates date = new Dates();
+                date.Id = dt.Id;
+                date.Title = dt.Title;
+                date.Description = dt.Description;
+                date.Date = dt.Date;
+                date.Duration = Dates.CalculateDuration(DateTime.Parse(dt.Date));
+                date.isRecurring = dt.isRecurring;
+                if (dt.RecurringEvent != null)
+                {
+                    date.RecurringEvent = new RecurringEvent
+                    {
+                        Frequency = dt.RecurringEvent.Frequency
+                    };
+                }
+                reurnval.Add(date);
+            }
             var result = new
             {
-                dates = documents,
+                dates = reurnval,
                 pagination = new
                 {
                     pageNumber,
