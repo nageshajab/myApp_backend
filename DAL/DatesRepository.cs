@@ -81,17 +81,17 @@ namespace myazfunction.DAL
             return await _dates.Find(d => d.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task CreateDateAsync(Dates dates)
+        public async System.Threading.Tasks.Task CreateDateAsync(Dates dates)
         {            
             await _dates.InsertOneAsync(dates);
         }
 
-        public async Task UpdateDateAsync(string id, Dates dates)
+        public async System.Threading.Tasks.Task UpdateDateAsync(string id, Dates dates)
         {
             await _dates.ReplaceOneAsync(d=> d.Id == id, dates);
         }
 
-        public async Task DeleteDateAsync(string id)
+        public async System.Threading.Tasks.Task DeleteDateAsync(string id)
         {
             await _dates.DeleteOneAsync(d => d.Id == id);
         }

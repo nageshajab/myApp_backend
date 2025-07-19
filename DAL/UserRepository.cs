@@ -33,23 +33,22 @@ namespace myazfunction.DAL
             return await _users.Find(user => user.UserName == username).FirstOrDefaultAsync();
         }
 
-        public async Task CreateUserAsync(Users user)
+        public async System.Threading.Tasks.Task CreateUserAsync(Users user)
         {
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
             await _users.InsertOneAsync(user);
         }
 
-        public async Task UpdateUserAsync(string id, Users user)
+        public async System.Threading.Tasks.Task UpdateUserAsync(string id, Users user)
         {
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
             await _users.ReplaceOneAsync(user => user.Id == id, user);
         }
 
-        public async Task DeleteUserAsync(string id)
+        public async System.Threading.Tasks.Task DeleteUserAsync(string id)
         {
             await _users.DeleteOneAsync(user => user.Id == id);
         }
-
 
         public async Task<Users> LoginAsync(string username, string password)
         {

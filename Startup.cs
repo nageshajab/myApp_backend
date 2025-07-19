@@ -28,6 +28,8 @@ namespace myazfunction
             builder.Services.AddSingleton<UserRepository>();
             builder.Services.AddSingleton<DatesRepository>();
             builder.Services.AddSingleton<KhataRepository>();
+            builder.Services.AddSingleton<TransactionRepository>();
+            builder.Services.AddSingleton<TaskRepository>();
         }
     }
 }

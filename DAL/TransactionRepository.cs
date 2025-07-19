@@ -8,20 +8,20 @@ using System.Threading.Tasks;
 
 namespace myazfunction.DAL
 {
-    public class KhataRepository
+    public class TransactionRepository
     {
-        private readonly IMongoCollection<Khata> _entries;
+        private readonly IMongoCollection<Transactions> _entries;
 
-        public KhataRepository(MongoDbContext context)
+        public TransactionRepository(MongoDbContext context)
         {
-            _entries = context.GetCollection<Khata>("khata");
+            _entries = context.GetCollection<Transactions>("transactions");
         }
 
-        public async Task<OkObjectResult> GetAllKhataEntriesAsync(string userid, string searchtxt, int pageNumber,string personName)
+        public async Task<OkObjectResult> GetAllTransactionsEntriesAsync(string userid, string searchtxt, int pageNumber)
         {
             int pageSize = 10;
             // Build filter
-            var builder = Builders<Khata>.Filter;
+            var builder = Builders<Transactions>.Filter;
             var filter = builder.Eq(p => p.UserId, userid);
 
             if (!string.IsNullOrEmpty(searchtxt))
@@ -29,12 +29,7 @@ namespace myazfunction.DAL
                 var searchFilter = builder.Regex(p => p.Title, new BsonRegularExpression(searchtxt, "i"));
                 filter = builder.And(filter, searchFilter);
             }
-            if (!string.IsNullOrEmpty(personName))
-            {
-                var searchFilter = builder.Regex(p => p.PersonName, new BsonRegularExpression(personName, "i"));
-                filter = builder.And(filter, searchFilter);
-            }
-
+           
             // Get total count for pagination
             var totalCount = await _entries.CountDocumentsAsync(filter);
 
@@ -45,24 +40,23 @@ namespace myazfunction.DAL
                 .Limit(10)
                 .ToListAsync();
 
-            List<Khata> reurnval = new List<Khata>();
-            foreach (Khata dt in documents)
+            List<Transactions> reurnval = new List<Transactions>();
+            foreach (Transactions dt in documents)
             {
-                Khata khata= new Khata();
+                Transactions khata= new Transactions();
                 khata.Id = dt.Id;
                 khata.Title = dt.Title;
                 khata.Amount= dt.Amount;
                 khata.Date = dt.Date;
                 khata.UserId=dt.UserId;
-                khata.PersonName = dt.PersonName;
+                khata.Description= dt.Description;
 
                 reurnval.Add(khata);
             }
-            var distinctPersonNames = await GetDistinctPersonNames();
+        
             var result = new
             {
-                khataEntries = reurnval,
-                distinctPersonNames= distinctPersonNames,
+                TransactionEntries = reurnval,
                 pagination = new
                 {
                     pageNumber,
@@ -75,29 +69,22 @@ namespace myazfunction.DAL
             return new OkObjectResult(result);
         }
 
-        public async Task<Khata> GetKhataEntryAsync(string id)
+        public async Task<Transactions> GetTransactionEntryAsync(string id)
         {
             return await _entries.Find(e => e.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task<List<string>> GetDistinctPersonNames()
+        public async System.Threading.Tasks.Task CreateTransactionEntryAsync(Transactions tra)
         {
-            var filter = Builders<Khata>.Filter.Ne(x => x.PersonName, null);
-            var distinctPersonNames = await _entries.Distinct(x => x.PersonName, filter).ToListAsync();
-            return distinctPersonNames;
+            await _entries.InsertOneAsync(tra);
         }
 
-        public async System.Threading.Tasks.Task CreateKhataEntryAsync(Khata khata)
+        public async System.Threading.Tasks.Task UpdateTransactionEntryAsync(string id, Transactions tra)
         {
-            await _entries.InsertOneAsync(khata);
+            await _entries.ReplaceOneAsync(e => e.Id == id, tra);
         }
 
-        public async System.Threading.Tasks.Task UpdateKhataEntryAsync(string id, Khata khata)
-        {
-            await _entries.ReplaceOneAsync(e => e.Id == id, khata);
-        }
-
-        public async System.Threading.Tasks.Task DeleteKhataEntryAsync(string id)
+        public async System.Threading.Tasks.Task DeleteTransactionEntryAsync(string id)
         {
             await _entries.DeleteOneAsync(e => e.Id == id);
         }
