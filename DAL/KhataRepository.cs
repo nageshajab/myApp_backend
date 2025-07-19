@@ -49,6 +49,7 @@ namespace myazfunction.DAL
                 khata.Amount= dt.Amount;
                 khata.Date = dt.Date;
                 khata.UserId=dt.UserId;
+                khata.PersonName = dt.PersonName;
 
                 reurnval.Add(khata);
             }

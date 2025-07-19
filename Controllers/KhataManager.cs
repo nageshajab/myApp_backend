@@ -134,6 +134,7 @@ namespace myazfunction.Controllers
             khatafromdb.Date = khata.Date;
             khatafromdb.Amount= khata.Amount;
             khatafromdb.UserId= khata.UserId;
+            khatafromdb.PersonName = khata.PersonName;
             khatafromdb.Id = khata.Id;
 
             await _khataRepository.UpdateKhataEntryAsync(khata.Id, khatafromdb);

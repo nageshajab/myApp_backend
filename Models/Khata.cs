@@ -17,6 +17,8 @@ namespace myazfunction.Models
         public string Amount{ get; set; }
 
         public string UserId { get; set; }
+
+        public string PersonName { get; set; }
     }
 
 }
