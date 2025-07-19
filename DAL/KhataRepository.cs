@@ -17,7 +17,7 @@ namespace myazfunction.DAL
             _entries = context.GetCollection<Khata>("khata");
         }
 
-        public async Task<OkObjectResult> GetAllKhataEntriesAsync(string userid, string searchtxt, int pageNumber)
+        public async Task<OkObjectResult> GetAllKhataEntriesAsync(string userid, string searchtxt, int pageNumber,string personName)
         {
             int pageSize = 10;
             // Build filter
@@ -27,6 +27,11 @@ namespace myazfunction.DAL
             if (!string.IsNullOrEmpty(searchtxt))
             {
                 var searchFilter = builder.Regex(p => p.Title, new BsonRegularExpression(searchtxt, "i"));
+                filter = builder.And(filter, searchFilter);
+            }
+            if (!string.IsNullOrEmpty(personName))
+            {
+                var searchFilter = builder.Regex(p => p.PersonName, new BsonRegularExpression(personName, "i"));
                 filter = builder.And(filter, searchFilter);
             }
 
@@ -53,10 +58,11 @@ namespace myazfunction.DAL
 
                 reurnval.Add(khata);
             }
-
+            var distinctPersonNames = await GetDistinctPersonNames();
             var result = new
             {
                 khataEntries = reurnval,
+                distinctPersonNames= distinctPersonNames,
                 pagination = new
                 {
                     pageNumber,
@@ -72,6 +78,13 @@ namespace myazfunction.DAL
         public async Task<Khata> GetKhataEntryAsync(string id)
         {
             return await _entries.Find(e => e.Id == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<string>> GetDistinctPersonNames()
+        {
+            var filter = Builders<Khata>.Filter.Ne(x => x.PersonName, null);
+            var distinctPersonNames = await _entries.Distinct(x => x.PersonName, filter).ToListAsync();
+            return distinctPersonNames;
         }
 
         public async Task CreateKhataEntryAsync(Khata khata)

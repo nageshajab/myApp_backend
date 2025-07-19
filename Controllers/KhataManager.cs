@@ -86,6 +86,7 @@ namespace myazfunction.Controllers
             string userId = data?.userid;
             string searchText = data?.searchtxt;
             int pageNumber = data?.pageNumber;
+            string personName = data?.personName;
             pageNumber = pageNumber > 0 ? pageNumber : 1;
 
             if (string.IsNullOrEmpty(userId))
@@ -93,7 +94,7 @@ namespace myazfunction.Controllers
                 return new BadRequestObjectResult("UserId is required.");
             }
 
-            var result = await _khataRepository.GetAllKhataEntriesAsync(userId, searchText, pageNumber);
+            var result = await _khataRepository.GetAllKhataEntriesAsync(userId, searchText, pageNumber, personName);
 
             return result;
         }
