@@ -23,9 +23,11 @@ namespace myazfunction
                 var options = sp.GetService<IOptions<MongoDbSettings>>();
                 return options.Value;
             });
+
             builder.Services.AddSingleton<MongoDbContext>();
             builder.Services.AddSingleton<UserRepository>();
             builder.Services.AddSingleton<DatesRepository>();
+            builder.Services.AddSingleton<KhataRepository>();
         }
     }
 }
