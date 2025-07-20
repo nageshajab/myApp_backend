@@ -30,6 +30,7 @@ namespace myazfunction
             builder.Services.AddSingleton<KhataRepository>();
             builder.Services.AddSingleton<TransactionRepository>();
             builder.Services.AddSingleton<TaskRepository>();
+            builder.Services.AddSingleton<WatchlistRepository>();
         }
     }
 }
