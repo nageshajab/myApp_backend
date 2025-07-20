@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using myazfunction.DAL;
 
 [assembly: FunctionsStartup(typeof(myazfunction.Startup))]
@@ -31,6 +32,8 @@ namespace myazfunction
             builder.Services.AddSingleton<TransactionRepository>();
             builder.Services.AddSingleton<TaskRepository>();
             builder.Services.AddSingleton<WatchlistRepository>();
+            builder.Services.AddSingleton<RentRepository>();
+            builder.Services.AddSingleton<TenantRepository>();
         }
     }
 }
