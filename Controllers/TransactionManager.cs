@@ -49,7 +49,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid khata entry data.");
             }
-
+            transactions.Date = transactions.Date.ToUniversalTime();
             await _transactionRepository.CreateTransactionEntryAsync(transactions);
 
             return new OkObjectResult(new { message = "Transaction Entry added successfully", data = transactions });
@@ -123,7 +123,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid transaction data ");
             }
-
+            transactions.Date = transactions.Date.ToUniversalTime(); // Convert to universal time
             var transactionfromdb = await _transactionRepository.GetTransactionEntryAsync(transactions.Id);
 
             if (transactionfromdb == null)

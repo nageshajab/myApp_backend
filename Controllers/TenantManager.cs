@@ -48,6 +48,9 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid tenant data.");
             }
+            
+            tenant.StartDate = tenant.StartDate.ToUniversalTime(); // Convert to UTC
+            tenant.EndDate=tenant.EndDate.ToUniversalTime(); // Convert to UTC
 
             await _tenantRepository.CreateTenantAsync(tenant);
 
@@ -121,7 +124,8 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid tenant data");
             }
-
+            tenant.StartDate = tenant.StartDate.ToUniversalTime(); // Convert to UTC
+            tenant.EndDate = tenant.EndDate.ToUniversalTime(); // Convert to UTC
             var tenantfromdb = await _tenantRepository.GetTenantAsync(tenant.Id);
 
             if (tenantfromdb    == null)

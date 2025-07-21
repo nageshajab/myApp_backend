@@ -49,7 +49,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid task entry data.");
             }
-
+            task.Date = task.Date.ToUniversalTime();
             await _taskRepository.CreateTaskEntryAsync(task);
 
             return new OkObjectResult(new { message = "Task Entry added successfully", data = task });
@@ -122,7 +122,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid task data ");
             }
-
+            task.Date = task.Date.ToUniversalTime();
             var taskfromdb = await _taskRepository.GetTaskEntryAsync(task.Id);
 
             if (taskfromdb== null)

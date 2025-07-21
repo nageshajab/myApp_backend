@@ -50,7 +50,7 @@ namespace myazfunction.DAL
                 date.Title = dt.Title;
                 date.Description = dt.Description;
                 date.Date = dt.Date;
-                date.Duration = Dates.CalculateDuration(DateTime.Parse(dt.Date));
+                date.Duration = Dates.CalculateDuration(dt.Date);
                 date.isRecurring = dt.isRecurring;
                 if (dt.RecurringEvent != null)
                 {

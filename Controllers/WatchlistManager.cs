@@ -49,7 +49,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid khata entry data.");
             }
-
+            watchlist.Date = watchlist.Date.ToUniversalTime();
             await _watchlistRepository.CreateWatchlistEntryAsync(watchlist);
 
             return new OkObjectResult(new { message = "Watchlist item added successfully", data = watchlist });
@@ -123,7 +123,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid watchlist item");
             }
-
+            watchlist.Date = watchlist.Date.ToUniversalTime(); // Convert to universal time
             var watchlistitemfromdb = await _watchlistRepository.GetWatchlistItemAsync(watchlist.Id);
 
             if (watchlistitemfromdb== null)

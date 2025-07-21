@@ -16,7 +16,7 @@ namespace myazfunction.Models
 
         public string Description { get; set; }
 
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
 
         [NotMapped]
         public string Duration { get; set; }

@@ -135,6 +135,7 @@ namespace myazfunction.DAL
 
         public async System.Threading.Tasks.Task CreateRentAsync(Rent rent)
         {
+         
             await _entries.InsertOneAsync(rent);
         }
 

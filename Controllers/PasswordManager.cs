@@ -59,7 +59,7 @@ namespace myazfunction.Controllers
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
             Passwords newPassword = JsonConvert.DeserializeObject<Passwords>(requestBody);
-
+            
             if(IsValidPassword(newPassword) == false)
             {
                 return new BadRequestObjectResult("Invalid password data.");

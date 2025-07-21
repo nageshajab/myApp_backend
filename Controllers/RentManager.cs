@@ -49,7 +49,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid rent data.");
             }
-
+            rent.Date = rent.Date.ToUniversalTime();
             await _rentRepository.CreateRentAsync(rent);
 
             return new OkObjectResult(new { message = "rent added successfully", data = rent });
@@ -185,7 +185,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid rent data");
             }
-
+            rent.Date = rent.Date.ToUniversalTime(); // Convert to universal time   
             var rentfromdb = await _rentRepository.GetRentAsync(rent.Id);
 
             if (rentfromdb == null)

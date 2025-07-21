@@ -45,7 +45,7 @@ namespace myazfunction.Controllers
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
             Dates newDates = JsonConvert.DeserializeObject<Dates>(requestBody);
-
+            newDates.Date = newDates.Date.ToUniversalTime();
             if (IsValidDate(newDates) == false)
             {
                 return new BadRequestObjectResult("Invalid dates data.");
@@ -59,7 +59,7 @@ namespace myazfunction.Controllers
         private bool IsValidDate(Dates dates)
         {
             return dates != null &&
-                   !string.IsNullOrWhiteSpace(dates.Date) &&
+                   dates.Date!=DateTime.MinValue &&
                    !string.IsNullOrWhiteSpace(dates.userid) &&
                    !string.IsNullOrWhiteSpace(dates.Title);
         }
@@ -124,6 +124,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid date data ");
             }
+            date.Date = date.Date.ToUniversalTime();//convert to UTC
 
             var datefromdb = await _datesRepository.GetDateAsync(date.Id);
             if (datefromdb == null)
@@ -197,7 +198,7 @@ namespace myazfunction.Controllers
             }
 
             var date = await _datesRepository.GetDateAsync(id);
-            date.Duration=Dates.CalculateDuration(DateTime.Parse(date.Date));
+            date.Duration=Dates.CalculateDuration(date.Date);
 
             return new OkObjectResult(date);
         }

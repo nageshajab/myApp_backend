@@ -54,7 +54,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid password data.");
             }
-
+            
             await _userRepository.CreateUserAsync(newUser);
 
             return new OkObjectResult(new { message = "Password added successfully", data = newUser });

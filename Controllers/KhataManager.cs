@@ -49,7 +49,7 @@ namespace myazfunction.Controllers
             {
                 return new BadRequestObjectResult("Invalid khata entry data.");
             }
-
+            khata.Date=khata.Date.ToUniversalTime();//to universal time
             await _khataRepository.CreateKhataEntryAsync(khata);
 
             return new OkObjectResult(new { message = "Khata Entry added successfully", data = khata });
@@ -118,7 +118,7 @@ namespace myazfunction.Controllers
             // Read and deserialize the request body
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             Khata khata= JsonConvert.DeserializeObject<Khata>(requestBody);
-
+            khata.Date = khata.Date.ToUniversalTime(); // Convert to universal time
             // Validate the object
             if (!IsValidEntry(khata))
             {
