@@ -3,7 +3,6 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using myazfunction.Models;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace myazfunction.DAL

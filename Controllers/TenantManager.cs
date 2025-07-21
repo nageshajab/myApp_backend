@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using myazfunction.DAL;
 using myazfunction.Models;
 using Newtonsoft.Json;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -135,6 +134,10 @@ namespace myazfunction.Controllers
             tenantfromdb.Deposit = tenant.Deposit;
             tenantfromdb.UserId = tenant.UserId;
             tenantfromdb.TenantName = tenant.TenantName;
+            tenantfromdb.Description = tenant.Description;
+            tenantfromdb.Rent = tenant.Rent;
+            tenantfromdb.Mobile = tenant.Mobile;
+            tenantfromdb.IsActive = tenant.IsActive;
 
             await _tenantRepository.UpdateTenantAsync(tenant.Id, tenantfromdb);
 

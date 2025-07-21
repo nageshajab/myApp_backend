@@ -38,5 +38,13 @@ namespace myazfunction.Models
         public string UserId { get; set; }
 
         public string TenantName { get; set; }
+
+        public string Description { get; set; }
+
+        public int Rent{ get; set; }
+
+        public int Mobile { get; set; }
+        
+        public bool IsActive { get; set; } = true; // Default to true, indicating the tenant is active
     }
 }
