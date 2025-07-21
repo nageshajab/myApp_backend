@@ -33,7 +33,7 @@ namespace myazfunction.DAL
                 var searchFilter = builder.Eq(p => p.TenantName, tenantname);
                 filter = builder.And(filter, searchFilter);
             }
-            month += 1; // Adjust month to be 1-based (0 means January, 11 means December)
+          //  month += 1; // Adjust month to be 1-based (0 means January, 11 means December)
             if (month > 0 && year > 0)
             {
                 var dateFilter = builder.And(
