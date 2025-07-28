@@ -17,6 +17,18 @@ namespace myazfunction.DAL
             _entries = context.GetCollection<Transactions>("transactions");
         }
 
+        public async Task<List<Transactions>> GetAllTransactionsEntriesAsync(string userid)
+        {
+            // Build filter
+            var builder = Builders<Transactions>.Filter;
+            var filter = builder.Eq(p => p.UserId, userid);
+            // Apply pagination
+            var documents = await _entries
+                .Find(filter)
+                .ToListAsync();
+            return documents;
+        }
+     
         public async Task<OkObjectResult> GetAllTransactionsEntriesAsync(string userid, string searchtxt, int pageNumber)
         {
             int pageSize = 10;
@@ -29,7 +41,7 @@ namespace myazfunction.DAL
                 var searchFilter = builder.Regex(p => p.Title, new BsonRegularExpression(searchtxt, "i"));
                 filter = builder.And(filter, searchFilter);
             }
-           
+
             // Get total count for pagination
             var totalCount = await _entries.CountDocumentsAsync(filter);
 
@@ -43,17 +55,17 @@ namespace myazfunction.DAL
             List<Transactions> reurnval = new List<Transactions>();
             foreach (Transactions dt in documents)
             {
-                Transactions khata= new Transactions();
+                Transactions khata = new Transactions();
                 khata.Id = dt.Id;
                 khata.Title = dt.Title;
-                khata.Amount= dt.Amount;
+                khata.Amount = dt.Amount;
                 khata.Date = dt.Date;
-                khata.UserId=dt.UserId;
-                khata.Description= dt.Description;
+                khata.UserId = dt.UserId;
+                khata.Description = dt.Description;
 
                 reurnval.Add(khata);
             }
-        
+
             var result = new
             {
                 TransactionEntries = reurnval,
@@ -68,7 +80,7 @@ namespace myazfunction.DAL
 
             return new OkObjectResult(result);
         }
-
+     
         public async Task<Transactions> GetTransactionEntryAsync(string id)
         {
             return await _entries.Find(e => e.Id == id).FirstOrDefaultAsync();

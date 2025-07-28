@@ -17,6 +17,19 @@ namespace myazfunction.DAL
             _entries = context.GetCollection<Watchlist>("WatchlistRepository");
         }
 
+        public async Task<List<Watchlist>> GetAllWatchlistEntriesAsync(string userid)
+        {
+            int pageSize = 10;
+            // Build filter
+            var builder = Builders<Watchlist>.Filter;
+            var filter = builder.Eq(p => p.UserId, userid);
+            // Apply pagination
+            var documents = await _entries
+                .Find(filter)
+                .ToListAsync();
+            return documents;
+        }
+
         public async Task<OkObjectResult> GetAllWatchlistEntriesAsync(string userid, string searchtxt, int pageNumber)
         {
             int pageSize = 10;
@@ -29,7 +42,7 @@ namespace myazfunction.DAL
                 var searchFilter = builder.Regex(p => p.Title, new BsonRegularExpression(searchtxt, "i"));
                 filter = builder.And(filter, searchFilter);
             }
-           
+
             // Get total count for pagination
             var totalCount = await _entries.CountDocumentsAsync(filter);
 
@@ -48,7 +61,7 @@ namespace myazfunction.DAL
                 khata.Title = dt.Title;
                 khata.Date = dt.Date;
                 khata.Status = dt.Status;
-                khata.UserId=dt.UserId;
+                khata.UserId = dt.UserId;
                 khata.Type = dt.Type;
                 khata.Language = dt.Language;
                 khata.Genre = dt.Genre;
@@ -57,7 +70,7 @@ namespace myazfunction.DAL
 
                 reurnval.Add(khata);
             }
-        
+
             var result = new
             {
                 items = reurnval,
@@ -71,7 +84,7 @@ namespace myazfunction.DAL
             };
 
             return new OkObjectResult(result);
-        }
+        }     
 
         public async Task<Watchlist> GetWatchlistItemAsync(string id)
         {

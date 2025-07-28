@@ -3,10 +3,8 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using myazfunction.Models;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace myazfunction.DAL
 {
@@ -17,6 +15,41 @@ namespace myazfunction.DAL
         public DatesRepository(MongoDbContext context)
         {
             _dates= context.GetCollection<Dates>("dates");
+        }
+
+        public async Task<List<Dates>> GetAllDatesAsync(string userid)
+        {
+            int pageSize = 10;
+            // Build filter
+            var builder = Builders<Dates>.Filter;
+            var filter = builder.Eq(p => p.userid, userid);
+
+            // Apply pagination
+            var documents = await _dates
+                .Find(filter)
+                .ToListAsync();
+
+            List<Dates> reurnval = new List<Dates>();
+            foreach (Dates dt in documents)
+            {
+                Dates date = new Dates();
+                date.Id = dt.Id;
+                date.Title = dt.Title;
+                date.Description = dt.Description;
+                date.Date = dt.Date;
+                date.Duration = Dates.CalculateDuration(dt.Date);
+                date.isRecurring = dt.isRecurring;
+                if (dt.RecurringEvent != null)
+                {
+                    date.RecurringEvent = new RecurringEvent
+                    {
+                        Frequency = dt.RecurringEvent.Frequency
+                    };
+                }
+                reurnval.Add(date);
+            }
+            
+            return reurnval;
         }
 
         public async Task<OkObjectResult> GetAllDatesAsync(string userid,string searchtxt,int pageNumber)

@@ -17,6 +17,34 @@ namespace myazfunction.DAL
             _entries = context.GetCollection<Khata>("khata");
         }
 
+        public async Task<List<Khata>> GetAllKhataEntriesAsync(string userid)
+        {
+            int pageSize = 10;
+            // Build filter
+            var builder = Builders<Khata>.Filter;
+            var filter = builder.Eq(p => p.UserId, userid);
+
+            // Apply pagination
+            var documents = await _entries
+                .Find(filter)
+                .ToListAsync();
+
+            List<Khata> reurnval = new List<Khata>();
+            foreach (Khata dt in documents)
+            {
+                Khata khata = new Khata();
+                khata.Id = dt.Id;
+                khata.Title = dt.Title;
+                khata.Amount = dt.Amount;
+                khata.Date = dt.Date;
+                khata.UserId = dt.UserId;
+                khata.PersonName = dt.PersonName;
+
+                reurnval.Add(khata);
+            }
+            return reurnval;
+        }
+
         public async Task<OkObjectResult> GetAllKhataEntriesAsync(string userid, string searchtxt, int pageNumber,string personName)
         {
             int pageSize = 10;

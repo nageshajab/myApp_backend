@@ -21,6 +21,24 @@ namespace myazfunction.DAL
             _tenantdb = context.GetCollection<Tenant>("tenant");
         }
 
+        public async Task<List<Rent>> GetAllRentsAsync(string userid)
+        {
+            int pageSize = 10;
+            // Build filter
+            var builder = Builders<Rent>.Filter;
+            var filter = builder.Eq(p => p.UserId, userid);
+
+            // Get total count for pagination
+            var totalCount = await _entries.CountDocumentsAsync(filter);
+
+            // Apply pagination
+            var documents = await _entries
+                .Find(filter)
+                .ToListAsync();
+            
+            return documents;
+        }
+
         public async Task<OkObjectResult> GetAllRentsAsync(string userid, string tenantname, int pageNumber, int month, int year)
         {
             int pageSize = 10;

@@ -17,6 +17,21 @@ namespace myazfunction.DAL
             _entries = context.GetCollection<Models.Task>("tasks");
         }
 
+        public async Task<List<Models.Task>> GetAllTasksEntriesAsync(string userid)
+        {
+            int pageSize = 10;
+            // Build filter
+            var builder = Builders<Models.Task>.Filter;
+            var filter = builder.Eq(p => p.UserId, userid);
+                        
+            // Apply pagination
+            var documents = await _entries
+                .Find(filter)
+                .ToListAsync();       
+
+            return documents;
+        }
+
         public async Task<OkObjectResult> GetAllTasksEntriesAsync(string userid, string searchtxt, int pageNumber)
         {
             int pageSize = 10;

@@ -3,6 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using myazfunction.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace myazfunction.DAL
@@ -14,6 +15,19 @@ namespace myazfunction.DAL
         public TenantRepository(MongoDbContext context)
         {
             _tenantdb = context.GetCollection<Tenant>("tenant");
+        }
+        public async Task<List<Tenant>> GetAllTenantsAsync(string userid)
+        {
+            // Build filter
+            var builder = Builders<Tenant>.Filter;
+            var filter = builder.Eq(p => p.UserId, userid);
+
+            // Apply pagination
+            var documents = await _tenantdb
+                .Find(filter)
+                .ToListAsync();
+
+            return documents;
         }
 
         public async Task<OkObjectResult> GetAllTenantsAsync(string userid, string searchtxt, int pageNumber)
