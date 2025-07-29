@@ -86,7 +86,7 @@ namespace myazfunction.DAL
 
                 reurnval.Add(khata);
             }
-            var distinctPersonNames = await GetDistinctPersonNames();
+            var distinctPersonNames = await GetDistinctPersonNames(userid);
             var result = new
             {
                 khataEntries = reurnval,
@@ -108,9 +108,9 @@ namespace myazfunction.DAL
             return await _entries.Find(e => e.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task<List<string>> GetDistinctPersonNames()
+        public async Task<List<string>> GetDistinctPersonNames(string userid)
         {
-            var filter = Builders<Khata>.Filter.Ne(x => x.PersonName, null);
+            var filter = Builders<Khata>.Filter.Eq(x => x.UserId, userid);
             var distinctPersonNames = await _entries.Distinct(x => x.PersonName, filter).ToListAsync();
             return distinctPersonNames;
         }

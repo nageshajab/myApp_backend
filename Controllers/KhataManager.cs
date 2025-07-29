@@ -199,6 +199,38 @@ namespace myazfunction.Controllers
             
             return new OkObjectResult(khata);
         }
+
+        [FunctionName("GetDistinctPersonNames")]
+        public async Task<IActionResult> GetDistinctPersonNames(
+       [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
+       ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            // Set CORS headers on the response
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
+
+            // Handle preflight OPTIONS request
+            if (req.Method == HttpMethods.Options)
+            {
+                return new OkResult(); // No body needed for preflight
+            }
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            string userId = data?.userid;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new BadRequestObjectResult("UserId is required.");
+            }
+
+            var result = await _khataRepository.GetDistinctPersonNames(userId);
+
+            return new OkObjectResult(result);
+        }
     }
 }
 
