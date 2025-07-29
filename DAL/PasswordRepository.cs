@@ -57,7 +57,7 @@ namespace myazfunction.DAL
            
             var result = new
             {
-                dates = documents,
+                passwords = documents,
                 pagination = new
                 {
                     pageNumber,

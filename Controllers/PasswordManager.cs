@@ -106,7 +106,7 @@ namespace myazfunction.Controllers
 
             var result = await _passwordRepository.GetAllPasswordsAsync(data.userid, data.searchtxt, data.pageNumber);
 
-            return new OkObjectResult(result);
+            return result;
         }
 
 
