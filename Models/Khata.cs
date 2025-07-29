@@ -14,7 +14,7 @@ namespace myazfunction.Models
 
         public DateTime Date{ get; set; }
 
-        public string Amount{ get; set; }
+        public int Amount{ get; set; }
 
         public string UserId { get; set; }
 

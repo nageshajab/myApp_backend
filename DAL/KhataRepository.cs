@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using myazfunction.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace myazfunction.DAL
@@ -15,6 +16,27 @@ namespace myazfunction.DAL
         public KhataRepository(MongoDbContext context)
         {
             _entries = context.GetCollection<Khata>("khata");
+        }
+
+        public async Task<Khata> GetPersonKhataReportAsync(string userId,string personName)
+        {
+            var builder = Builders<Khata>.Filter;
+            var filter = builder.And(
+                builder.Eq(p => p.UserId, userId),
+                builder.Eq(p => p.PersonName, personName)
+            );
+
+            var result = await _entries
+               .Aggregate()
+               .Match(filter)
+               .Group(x => x.PersonName, g => new Khata
+               {
+                   PersonName = g.Key,
+                   Amount= g.Sum(x => x.Amount)
+               })
+               .ToListAsync();
+
+            return result.FirstOrDefault();
         }
 
         public async Task<List<Khata>> GetAllKhataEntriesAsync(string userid)

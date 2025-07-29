@@ -60,7 +60,7 @@ namespace myazfunction.Controllers
             return khata!= null &&
                    !string.IsNullOrWhiteSpace(khata.Title) &&
                    !khata.Date.Equals(DateTime.MinValue) &&
-                   !string.IsNullOrWhiteSpace(khata.Amount);
+                   khata.Amount!=0;
         }
 
         [FunctionName("GetKhataEntries")]
@@ -97,6 +97,39 @@ namespace myazfunction.Controllers
             var result = await _khataRepository.GetAllKhataEntriesAsync(userId, searchText, pageNumber, personName);
 
             return result;
+        }
+
+        [FunctionName("GetPersonKhataReport")]
+        public async Task<IActionResult> GetPersonKhataReport(
+    [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
+    ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            // Set CORS headers on the response
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
+
+            // Handle preflight OPTIONS request
+            if (req.Method == HttpMethods.Options)
+            {
+                return new OkResult(); // No body needed for preflight
+            }
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            string personName = data?.personName;
+            string userId = data?.userid;
+
+            if (string.IsNullOrEmpty(personName))
+            {
+                return new BadRequestObjectResult("personName is required.");
+            }
+
+            var result = await _khataRepository.GetPersonKhataReportAsync(userId,personName);
+
+            return new OkObjectResult(result);
         }
 
         [FunctionName("updateKhataEntry")]
