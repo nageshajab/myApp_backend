@@ -35,6 +35,7 @@ namespace myazfunction
             builder.Services.AddSingleton<RentRepository>();
             builder.Services.AddSingleton<TenantRepository>();
             builder.Services.AddSingleton<PasswordRepository>();
+            builder.Services.AddSingleton<DocumentRepository>();
         }
     }
 }
