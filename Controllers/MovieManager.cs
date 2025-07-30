@@ -65,6 +65,38 @@ namespace myazfunction.Controllers
                   ;
         }
 
+        [FunctionName("GetAllTags")]
+        public async Task<IActionResult> GetAllTags(
+      [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
+      ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            // Set CORS headers on the response
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
+
+            // Handle preflight OPTIONS request
+            if (req.Method == HttpMethods.Options)
+            {
+                return new OkResult(); // No body needed for preflight
+            }
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            string userId = data?.userid;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new BadRequestObjectResult("UserId is required.");
+            }
+
+            var result = await _movieRepository.GetAllTagsAsync(userId);
+
+            return new OkObjectResult( result);
+        }
+
         [FunctionName("GetMovies")]
         public async Task<IActionResult> GetMovies(
        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
@@ -87,6 +119,7 @@ namespace myazfunction.Controllers
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             string userId = data?.userid;
             string searchText = data?.searchtxt;
+            string selectedtags = data?.tags;
             int pageNumber = data?.pageNumber;
             pageNumber = pageNumber > 0 ? pageNumber : 1;
 
@@ -95,7 +128,7 @@ namespace myazfunction.Controllers
                 return new BadRequestObjectResult("UserId is required.");
             }
 
-            var result = await _movieRepository.GetAllMoviesAsync(userId, searchText, pageNumber);
+            var result = await _movieRepository.GetAllMoviesAsync(userId, searchText,selectedtags, pageNumber);
 
             return result;
         }
