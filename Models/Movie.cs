@@ -15,6 +15,7 @@ namespace myazfunction.Models
         public string tags { get; set; }
         public string Url { get; set; }
         public byte[] ImageData { get; set; } // This stores the image
+        public bool IsJav { get; set; }
     }
 
     public class MovieTags

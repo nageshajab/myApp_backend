@@ -120,6 +120,7 @@ namespace myazfunction.Controllers
             string userId = data?.userid;
             string searchText = data?.searchtxt;
             string selectedtags = data?.tags;
+            bool isJav = data?.isJav;
             int pageNumber = data?.pageNumber;
             pageNumber = pageNumber > 0 ? pageNumber : 1;
 
@@ -128,7 +129,7 @@ namespace myazfunction.Controllers
                 return new BadRequestObjectResult("UserId is required.");
             }
 
-            var result = await _movieRepository.GetAllMoviesAsync(userId, searchText,selectedtags, pageNumber);
+            var result = await _movieRepository.GetAllMoviesAsync(userId, searchText,selectedtags, pageNumber,isJav);
 
             return result;
         }
@@ -171,6 +172,7 @@ namespace myazfunction.Controllers
             moviefromdb.UserId = movie.UserId;
             moviefromdb.ImageData=movie.ImageData;
             moviefromdb.Url = movie.Url;
+            moviefromdb.IsJav = movie.IsJav;
 
             await _movieRepository.UpdateMovieAsync(movie.Id, moviefromdb);
 

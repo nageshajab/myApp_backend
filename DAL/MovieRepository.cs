@@ -11,6 +11,7 @@ namespace myazfunction.DAL
 {
     public class MovieRepository
     {
+        int pageSize = 12;
         private readonly IMongoCollection<Movie> _entries;
         private readonly IMongoCollection<MovieTags> _tags;
 
@@ -20,9 +21,8 @@ namespace myazfunction.DAL
             _tags = context.GetCollection<MovieTags>("MovieTags");
         }
 
-        public async Task<OkObjectResult> GetAllMoviesAsync(string userid, string searchtxt,string selectedTags, int pageNumber)
-        {
-            int pageSize = 10;
+        public async Task<OkObjectResult> GetAllMoviesAsync(string userid, string searchtxt, string selectedTags, int pageNumber,bool isJav)
+        {            
             // Build filter
             var builder = Builders<Movie>.Filter;
             var filter = builder.Eq(p => p.UserId, userid);
@@ -33,14 +33,12 @@ namespace myazfunction.DAL
                 filter = builder.And(filter, searchFilter);
             }
 
-           if (!string.IsNullOrEmpty(selectedTags))
-{
-    var tagsArray = selectedTags.Split(',').Select(t => t.Trim()).ToList();
-    var searchFilter = builder.Or(tagsArray.Select(tag => builder.Regex("tags", new BsonRegularExpression(tag, "i"))).ToArray());
-    filter = builder.And(filter, searchFilter);
-}
-
-
+            if (!string.IsNullOrEmpty(selectedTags))
+            {
+                var tagsArray = selectedTags.Split(',').Select(t => t.Trim()).ToList();
+                var searchFilter = builder.Or(tagsArray.Select(tag => builder.Regex("tags", new BsonRegularExpression(tag, "i"))).ToArray());
+                filter = builder.And(filter, searchFilter);
+            }
 
             // Get total count for pagination
             var totalCount = await _entries.CountDocumentsAsync(filter);
@@ -48,8 +46,8 @@ namespace myazfunction.DAL
             // Apply pagination
             var documents = await _entries
                 .Find(filter)
-                .Skip((pageNumber - 1) * 10)
-                .Limit(10)
+                .Skip((pageNumber - 1) * pageSize)
+                .Limit(pageSize)
                 .ToListAsync();
 
             var alltags = await GetAllTagsAsync(userid);
