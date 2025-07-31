@@ -26,10 +26,20 @@ namespace myazfunction.DAL
             // Build filter
             var builder = Builders<Movie>.Filter;
             var filter = builder.Eq(p => p.UserId, userid);
+            var projection = Builders<Movie>.Projection
+                .Include(p => p.Id)                
+                .Include(p => p.Title)
+                .Include(p => p.Url);
 
             if (!string.IsNullOrEmpty(searchtxt))
             {
                 var searchFilter = builder.Regex(p => p.Title, new BsonRegularExpression(searchtxt, "i"));
+                filter = builder.And(filter, searchFilter);
+            }
+            
+            if (isJav)
+            {
+                var searchFilter = builder.Regex(p => p.tags, new BsonRegularExpression("jav", "i"));
                 filter = builder.And(filter, searchFilter);
             }
 
@@ -46,14 +56,27 @@ namespace myazfunction.DAL
             // Apply pagination
             var documents = await _entries
                 .Find(filter)
+                .Project(projection)
                 .Skip((pageNumber - 1) * pageSize)
                 .Limit(pageSize)
                 .ToListAsync();
 
+            List<Movie> returnval = new List<Movie>();
+            foreach (var doc in documents)
+            {
+                returnval.Add(new Movie
+                {
+                    Id = doc["_id"].AsObjectId.ToString(),
+                    Title = doc["Title"].AsString,
+                    Url = doc["Url"].AsString,
+                    IsJav = isJav,
+                    UserId = userid
+                });
+            }
             var alltags = await GetAllTagsAsync(userid);
             var result = new
             {
-                movies = documents,
+                movies = returnval,
                 tags = alltags,
                 pagination = new
                 {
