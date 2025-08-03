@@ -110,7 +110,7 @@ namespace myazfunction.Controllers
             if (req.Method == HttpMethods.Options)
             {
                 return new OkResult(); // No body needed for preflight
-            }
+            } 
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
