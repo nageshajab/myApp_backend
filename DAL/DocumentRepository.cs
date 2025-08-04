@@ -74,5 +74,11 @@ namespace myazfunction.DAL
         {
             await _documents.DeleteOneAsync(d => d.Id == id);
         }
+
+        public async Task<Document> GetDocumentBytes(string id)
+        {
+            var item = await _documents.Find(e => e.Id == id).FirstOrDefaultAsync();
+            return item;
+        }
     }
 }

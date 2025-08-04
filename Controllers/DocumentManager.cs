@@ -27,7 +27,7 @@ namespace myazfunction.Controllers
     public class DocumentManager
     {
         private readonly ILogger<PasswordManager> _logger;
-        private readonly DocumentRepository _documentRepository ;
+        private readonly DocumentRepository _documentRepository;
 
 
         public DocumentManager(ILogger<PasswordManager> log, DocumentRepository documentRepository)
@@ -58,7 +58,7 @@ namespace myazfunction.Controllers
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
-            Document document= JsonConvert.DeserializeObject<Document>(requestBody);
+            Document document = JsonConvert.DeserializeObject<Document>(requestBody);
 
             if (IsValidDocument(document) == false)
             {
@@ -72,9 +72,11 @@ namespace myazfunction.Controllers
 
         private bool IsValidDocument(Document document)
         {
-            return document!= null &&
+            return document != null &&
                    !string.IsNullOrWhiteSpace(document.Title) &&
-                   !string.IsNullOrWhiteSpace(document.Url) &&
+                   (!string.IsNullOrWhiteSpace(document.Url)
+                   || document.File.Length != 0
+                   ) &&
             !string.IsNullOrWhiteSpace(document.UserId);
         }
 
@@ -203,6 +205,41 @@ namespace myazfunction.Controllers
             var document = await _documentRepository.GetDocumentAsync(id);
 
             return new OkObjectResult(document);
+        }
+
+        [FunctionName("GetDocumentBytes")]
+        public async Task<IActionResult> GetDocumentBytes(
+[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "document/{id}")] HttpRequest req,
+string id,
+ILogger log)
+        {
+            // Set CORS headers on the response
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            req.HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
+
+            // Handle preflight OPTIONS request
+            if (req.Method == HttpMethods.Options)
+            {
+                return new OkResult(); // No body needed for preflight
+            }
+
+            var item = await _documentRepository.GetDocumentBytes(id);
+            if (item == null || item.File == null)
+            {
+                return new NotFoundResult();
+            }
+
+            var fileName = string.IsNullOrEmpty(item.FileName) ? "document.bin" : item.FileName;
+            var contentDisposition = new System.Net.Mime.ContentDisposition
+            {
+                FileName = fileName,
+                Inline = false
+            };
+
+            req.HttpContext.Response.Headers.Add("Content-Disposition", contentDisposition.ToString());
+
+            return new FileContentResult(item.File, "application/octet-stream");
         }
     }
 }
