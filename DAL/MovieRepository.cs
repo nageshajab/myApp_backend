@@ -5,6 +5,7 @@ using myazfunction.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace myazfunction.DAL
@@ -46,9 +47,13 @@ namespace myazfunction.DAL
             if (!string.IsNullOrEmpty(selectedTags))
             {
                 var tagsArray = selectedTags.Split(',').Select(t => t.Trim()).ToList();
-                var searchFilter = builder.Or(tagsArray.Select(tag => builder.Regex("tags", new BsonRegularExpression(tag, "i"))).ToArray());
-                filter = builder.And(filter, searchFilter);
+                foreach (var tag in tagsArray)
+                {
+                    var regex = new BsonRegularExpression("\\b" + Regex.Escape(tag) + "\\b", "i");
+                    filter = builder.And(filter, builder.Regex("tags", regex));
+                }
             }
+
 
             // Get total count for pagination
             var totalCount = await _entries.CountDocumentsAsync(filter);
@@ -100,10 +105,11 @@ namespace myazfunction.DAL
             var tags = await _tags
                 .Find(e => e.UserId == userid)
                 .Project(e => e.Tag)
+                .SortBy(t => t.Tag)
                 .ToListAsync();
-
             return tags;
         }
+
 
         public async System.Threading.Tasks.Task InsertMissingTags(Movie tra)
         {
