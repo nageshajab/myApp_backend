@@ -41,7 +41,6 @@ namespace myazfunction.DAL
 
         public async Task<List<Khata>> GetAllKhataEntriesAsync(string userid)
         {
-            int pageSize = 10;
             // Build filter
             var builder = Builders<Khata>.Filter;
             var filter = builder.Eq(p => p.UserId, userid);

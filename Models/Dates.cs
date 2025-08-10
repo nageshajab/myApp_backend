@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace myazfunction.Models
 {
-
     public class Dates
     {
         [BsonId]
@@ -53,8 +52,6 @@ namespace myazfunction.Models
 
             return $"{years} years, {months} months, {days} days";
         }
-
-
     }
 
     public class RecurringEvent

@@ -2,48 +2,33 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using MongoDB.Bson;
-using MongoDB.Driver;
 using myazfunction.DAL;
 using myazfunction.Models;
 using Newtonsoft.Json;
 using System;
 using System.IO;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace myazfunction.Controllers
 {
-    public class PasswordsPage
+    public class EventsManager
     {
-        public int pageNumber { get; set; }
-        public string searchtxt { get; set; }
-        public string userid { get; set; }
-    }
+        private readonly ILogger<EventsManager> _logger;
+        private readonly EventsRepository _EventsRepository;
 
-    public class PasswordManager
-    {
-        private readonly ILogger<PasswordManager> _logger;
-        private readonly PasswordRepository _passwordRepository;
-
-
-        public PasswordManager(ILogger<PasswordManager> log, PasswordRepository passwordRepository)
+        public EventsManager(ILogger<EventsManager> log, EventsRepository EventsRepository)
         {
             _logger = log;
-            _passwordRepository = passwordRepository;
+            _EventsRepository = EventsRepository;
         }
 
-        [FunctionName("PasswordCreate")]
-        [OpenApiOperation(operationId: "Run", tags: new[] { "UserId" })]
-        [OpenApiParameter(name: "UserId", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **UserId** parameter")]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> PasswordCreate(
+        [FunctionName("createEvent")]
+        public async Task<IActionResult> CreateEvent(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
+
             // Set CORS headers on the response
             req.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
             req.HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -54,37 +39,38 @@ namespace myazfunction.Controllers
             {
                 return new OkResult(); // No body needed for preflight
             }
+
             string UserId = req.Query["UserId"];
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
-            Passwords newPassword = JsonConvert.DeserializeObject<Passwords>(requestBody);
-
-            if (IsValidPassword(newPassword) == false)
+            Events newEvents = JsonConvert.DeserializeObject<Events>(requestBody);
+            newEvents.Date = newEvents.Date.ToUniversalTime();
+            if (IsValidEvent(newEvents) == false)
             {
-                return new BadRequestObjectResult("Invalid password data.");
+                return new BadRequestObjectResult("Invalid Events data.");
             }
 
-            await _passwordRepository.CreatePasswordAsync(newPassword);
+            await _EventsRepository.CreateEventAsync(newEvents);
 
-            return new OkObjectResult(new { message = "Password added successfully", data = newPassword });
+            return new OkObjectResult(new { message = "Events added successfully", data = newEvents });
         }
 
-        private bool IsValidPassword(Passwords password)
+        private bool IsValidEvent(Events Events)
         {
-            return password != null &&
-                   !string.IsNullOrWhiteSpace(password.System) &&
-                   !string.IsNullOrWhiteSpace(password.UserName) &&
-                   !string.IsNullOrWhiteSpace(password.Password) &&
-                   !string.IsNullOrWhiteSpace(password.UserId);
+            return Events != null &&
+                   Events.Date!=DateTime.MinValue &&
+                   !string.IsNullOrWhiteSpace(Events.userid) &&
+                   !string.IsNullOrWhiteSpace(Events.Title);
         }
 
-        [FunctionName("GetPasswords")]
-        public async Task<IActionResult> GetPasswords(
+        [FunctionName("GetEvents")]
+        public async Task<IActionResult> GetEvents(
        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
        ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
+
             // Set CORS headers on the response
             req.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
             req.HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -95,25 +81,26 @@ namespace myazfunction.Controllers
             {
                 return new OkResult(); // No body needed for preflight
             }
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            PasswordsPage data = JsonConvert.DeserializeObject<PasswordsPage>(requestBody);
 
-            if (string.IsNullOrEmpty(data.userid))
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            string userId = data?.userid;
+            string searchText = data?.searchtxt;
+            int pageNumber = data?.pageNumber;
+            pageNumber = pageNumber > 0 ? pageNumber : 1;
+
+            if (string.IsNullOrEmpty(userId))
             {
                 return new BadRequestObjectResult("UserId is required.");
             }
 
-            var result = await _passwordRepository.GetAllPasswordsAsync(data.userid, data.searchtxt, data.pageNumber);
+            var result = await _EventsRepository.GetAllEventsAsync(userId, searchText, pageNumber);
 
             return result;
         }
 
-
-        [FunctionName("PasswordUpdate")]
-        [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
-        [OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> PasswordUpdate(
+        [FunctionName("updateEvent")]
+        public async Task<IActionResult> updateEvent(
       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
@@ -127,27 +114,39 @@ namespace myazfunction.Controllers
             {
                 return new OkResult(); // No body needed for preflight
             }
+
             // Read and deserialize the request body
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            Passwords passwords = JsonConvert.DeserializeObject<Passwords>(requestBody);
+            Events Event = JsonConvert.DeserializeObject<Events>(requestBody);
 
-            // Validate the object
-            if (!IsValidPassword(passwords) || string.IsNullOrEmpty(passwords.Id))
+            // ValiEvent the object
+            if (!IsValidEvent(Event))
             {
-                return new BadRequestObjectResult("Invalid password data or missing Id.");
+                return new BadRequestObjectResult("Invalid Event data ");
             }
+            Event.Date = Event.Date.ToUniversalTime();//convert to UTC
 
-            await _passwordRepository.UpdatePasswordAsync(passwords.Id, passwords);
+            var Eventfromdb = await _EventsRepository.GetEventAsync(Event.Id);
+            if (Eventfromdb == null)
+            {
+                return new NotFoundObjectResult("Event not found.");
+            }
+            Eventfromdb.userid = Event.userid;
+            Eventfromdb.Title = Event.Title;
+            Eventfromdb.Date = Event.Date;
+            Eventfromdb.Description = Event.Description;
+            Eventfromdb.MarkFinished = Event.MarkFinished;
+           
+            Eventfromdb.Id = Event.Id;
 
-            return new OkObjectResult(new { message = "Password updated successfully", data = passwords });
+            await _EventsRepository.UpdateEventAsync(Event.Id, Eventfromdb);
 
+            return new OkObjectResult(new { message = "Event updated successfully" });
         }
 
-        [FunctionName("PasswordDelete")]
-        [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
-        [OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> PasswordDelete(
+
+        [FunctionName("EventDelete")]
+        public async Task<IActionResult> EventDelete(
       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request to delete a password.");
@@ -168,17 +167,13 @@ namespace myazfunction.Controllers
                 return new BadRequestObjectResult("Password Id is required.");
             }
 
-            await _passwordRepository.DeletePasswordAsync(id);
+            await _EventsRepository.DeleteEventAsync(id);
 
-            return new OkObjectResult(new { message = "Password deleted successfully", deletedId = id });
-
+            return new OkObjectResult(new { message = "Event deleted successfully" });
         }
 
-        [FunctionName("PasswordGet")]
-        [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
-        [OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> PasswordGet(
+        [FunctionName("EventGet")]      
+        public async Task<IActionResult> EventGet(
       [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req)
         {
 
@@ -193,17 +188,19 @@ namespace myazfunction.Controllers
             {
                 return new OkResult(); // No body needed for preflight
             }
+
             string id = req.Query["id"];
 
             if (string.IsNullOrEmpty(id))
             {
-                return new BadRequestObjectResult("Password Id is required.");
+                return new BadRequestObjectResult("Event Id is required.");
             }
 
-            var password = await _passwordRepository.GetPasswordAsync(id);
+            var Event = await _EventsRepository.GetEventAsync(id);
 
-            return new OkObjectResult(password);
+            return new OkObjectResult(Event);
         }
+
     }
 }
 

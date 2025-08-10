@@ -19,7 +19,6 @@ namespace myazfunction.DAL
 
         public async Task<List<Models.Task>> GetAllTasksEntriesAsync(string userid)
         {
-            int pageSize = 10;
             // Build filter
             var builder = Builders<Models.Task>.Filter;
             var filter = builder.Eq(p => p.UserId, userid);

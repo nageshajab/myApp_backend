@@ -19,7 +19,6 @@ namespace myazfunction.DAL
 
         public async Task<List<Watchlist>> GetAllWatchlistEntriesAsync(string userid)
         {
-            int pageSize = 10;
             // Build filter
             var builder = Builders<Watchlist>.Filter;
             var filter = builder.Eq(p => p.UserId, userid);

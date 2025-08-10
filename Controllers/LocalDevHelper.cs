@@ -27,8 +27,9 @@ namespace myazfunction.Controllers
         private readonly TransactionRepository _transactionRepository;
         private readonly UserRepository _userRepository;
         private readonly WatchlistRepository _watchlistRepository;
+        private readonly EventsRepository _eventsRepository;
 
-        public LocalDevHelper(DatesRepository datesRepository, KhataRepository khataRepository, PasswordRepository passwordRepository, RentRepository rentRepository, TaskRepository taskRepository, TenantRepository tenantRepository, TransactionRepository transactionRepository, UserRepository userRepository, WatchlistRepository watchlistRepository)
+        public LocalDevHelper(DatesRepository datesRepository, KhataRepository khataRepository, PasswordRepository passwordRepository, RentRepository rentRepository, TaskRepository taskRepository, TenantRepository tenantRepository, TransactionRepository transactionRepository, UserRepository userRepository, WatchlistRepository watchlistRepository, EventsRepository eventsRepository)
         {
             _datesRepository = datesRepository;
             _khataRepository = khataRepository;
@@ -39,33 +40,55 @@ namespace myazfunction.Controllers
             _transactionRepository = transactionRepository;
             _userRepository = userRepository;
             _watchlistRepository = watchlistRepository;
+            _eventsRepository = eventsRepository;
         }
 
-        [FunctionName("CopyDataFromOneUserToAnother")]
+        [FunctionName("execute")]
         [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
         [OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> CopyDataFromOneUserToAnother(
+        public async Task<IActionResult> execute(
       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
+            await copyDatesToEvents();
             //await copyDates();
-            Console.WriteLine("Dates copied..");
-            // await copyKhataData();
-            Console.WriteLine("Khata data copied..");
-            // await copyPasswordData();
-            Console.WriteLine("Password data copied..");
-            await copyRentData();
-            Console.WriteLine("rent data copied");
-            await copyTaskData();
-            Console.WriteLine("Task data copied..");
-            await copyTenantData();
-            Console.WriteLine("tenant data copied..");
-            await copyTransactionData();
-            Console.WriteLine("Transaction data copied..");
-            await copyWatchlistData();
-            Console.WriteLine("Watchlist data copied..");
+            //Console.WriteLine("Dates copied..");
+            //// await copyKhataData();
+            //Console.WriteLine("Khata data copied..");
+            //// await copyPasswordData();
+            //Console.WriteLine("Password data copied..");
+            //await copyRentData();
+            //Console.WriteLine("rent data copied");
+            //await copyTaskData();
+            //Console.WriteLine("Task data copied..");
+            //await copyTenantData();
+            //Console.WriteLine("tenant data copied..");
+            //await copyTransactionData();
+            //Console.WriteLine("Transaction data copied..");
+            //await copyWatchlistData();
+            //Console.WriteLine("Watchlist data copied..");
 
-            return null;
+            return new OkObjectResult("ok");
+        }
+
+        private async System.Threading.Tasks.Task copyDatesToEvents()
+        {
+            //copy dates from one user to another
+            var documents = await _datesRepository.GetAllDatesAsync(newuserid);
+            foreach (var date in documents)
+            {
+                var newEvent = new Events
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    userid = date.userid,
+                    Title = date.Title,
+                    Date = date.Date,
+                    Description = date.Description,
+                    MarkFinished=false
+                };
+
+                await _eventsRepository.CreateEventAsync(newEvent);
+            }
         }
 
         private async System.Threading.Tasks.Task copyDates()
@@ -236,6 +259,7 @@ namespace myazfunction.Controllers
                 await _userRepository.CreateUserAsync(p);
             }
         }
+
         private async System.Threading.Tasks.Task copyWatchlistData()
         {
             //copy dates from one user to another

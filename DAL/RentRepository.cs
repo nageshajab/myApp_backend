@@ -23,7 +23,6 @@ namespace myazfunction.DAL
 
         public async Task<List<Rent>> GetAllRentsAsync(string userid)
         {
-            int pageSize = 10;
             // Build filter
             var builder = Builders<Rent>.Filter;
             var filter = builder.Eq(p => p.UserId, userid);
@@ -91,7 +90,6 @@ namespace myazfunction.DAL
 
         public async Task<OkObjectResult> GetPendingRentsAsync(string userid,int month, int year)
         {
-            int pageSize = 10;
             // Build filter
             var builder = Builders<Rent>.Filter;
             var filter = builder.Eq(p => p.UserId, userid);

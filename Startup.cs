@@ -38,6 +38,7 @@ namespace myazfunction
             builder.Services.AddSingleton<DocumentRepository>();
             builder.Services.AddSingleton<MovieRepository>();
             builder.Services.AddSingleton<FinancialStatusRepository>();
+            builder.Services.AddSingleton<EventsRepository>();
         }
     }
 }

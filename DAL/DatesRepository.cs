@@ -11,15 +11,16 @@ namespace myazfunction.DAL
     public class DatesRepository
     {
         private readonly IMongoCollection<Dates> _dates;
+        private readonly IMongoCollection<Events> _events;
 
         public DatesRepository(MongoDbContext context)
         {
             _dates= context.GetCollection<Dates>("dates");
+            _events = context.GetCollection<Events>("Events");
         }
 
         public async Task<List<Dates>> GetAllDatesAsync(string userid)
         {
-            int pageSize = 10;
             // Build filter
             var builder = Builders<Dates>.Filter;
             var filter = builder.Eq(p => p.userid, userid);
@@ -38,6 +39,7 @@ namespace myazfunction.DAL
                 date.Description = dt.Description;
                 date.Date = dt.Date;
                 date.Duration = Dates.CalculateDuration(dt.Date);
+                date.userid=dt.userid;
                 date.isRecurring = dt.isRecurring;
                 if (dt.RecurringEvent != null)
                 {
@@ -117,11 +119,29 @@ namespace myazfunction.DAL
         public async System.Threading.Tasks.Task CreateDateAsync(Dates dates)
         {            
             await _dates.InsertOneAsync(dates);
+            await _events.InsertOneAsync(new Events
+            {
+                Id = ObjectId.GenerateNewId().ToString(),
+                Title = dates.Title,
+                Description = dates.Description,
+                Date = dates.Date,
+                userid = dates.userid,
+                MarkFinished=false
+            });
         }
 
         public async System.Threading.Tasks.Task UpdateDateAsync(string id, Dates dates)
         {
             await _dates.ReplaceOneAsync(d=> d.Id == id, dates);
+            await _events.ReplaceOneAsync(e => e.Id == id, new Events
+            {
+                Id = id,
+                Title = dates.Title,
+                Description = dates.Description,
+                Date = dates.Date,
+                userid = dates.userid,
+                MarkFinished= false
+            });
         }
 
         public async System.Threading.Tasks.Task DeleteDateAsync(string id)

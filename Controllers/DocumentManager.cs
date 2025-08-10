@@ -85,7 +85,6 @@ namespace myazfunction.Controllers
        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
        ILogger log)
         {
-            int pageSize = 10;
             log.LogInformation("C# HTTP trigger function processed a request.");
             // Set CORS headers on the response
             req.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*");
