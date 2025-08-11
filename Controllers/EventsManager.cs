@@ -87,6 +87,7 @@ namespace myazfunction.Controllers
             string userId = data?.userid;
             string searchText = data?.searchtxt;
             int pageNumber = data?.pageNumber;
+            Boolean showall= data?.showAll;
             pageNumber = pageNumber > 0 ? pageNumber : 1;
 
             if (string.IsNullOrEmpty(userId))
@@ -94,7 +95,7 @@ namespace myazfunction.Controllers
                 return new BadRequestObjectResult("UserId is required.");
             }
 
-            var result = await _EventsRepository.GetAllEventsAsync(userId, searchText, pageNumber);
+            var result = await _EventsRepository.GetAllEventsAsync(userId, searchText, pageNumber,showall);
 
             return result;
         }

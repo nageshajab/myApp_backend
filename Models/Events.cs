@@ -2,6 +2,7 @@
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace myazfunction.Models
 {
@@ -20,5 +21,10 @@ namespace myazfunction.Models
         public string userid { get; set; }
 
         public bool MarkFinished { get; set; }
+
+        [NotMapped]
+        public string Duration { get; set; }
+
+      
     }
 }
