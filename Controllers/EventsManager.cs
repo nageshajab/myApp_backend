@@ -59,7 +59,7 @@ namespace myazfunction.Controllers
         private bool IsValidEvent(Events Events)
         {
             return Events != null &&
-                   Events.Date!=DateTime.MinValue &&
+                   Events.Date != DateTime.MinValue &&
                    !string.IsNullOrWhiteSpace(Events.userid) &&
                    !string.IsNullOrWhiteSpace(Events.Title);
         }
@@ -84,10 +84,11 @@ namespace myazfunction.Controllers
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
+            _logger.LogInformation("Received request body: {RequestBody}", requestBody);
             string userId = data?.userid;
             string searchText = data?.searchtxt;
             int pageNumber = data?.pageNumber;
-            Boolean showall= data?.showAll;
+            Boolean showall = data?.showAll;
             pageNumber = pageNumber > 0 ? pageNumber : 1;
 
             if (string.IsNullOrEmpty(userId))
@@ -95,9 +96,11 @@ namespace myazfunction.Controllers
                 return new BadRequestObjectResult("UserId is required.");
             }
 
-            var result = await _EventsRepository.GetAllEventsAsync(userId, searchText, pageNumber,showall);
+            ReturnValEvents result = await _EventsRepository.GetAllEventsAsync(userId, searchText, pageNumber, showall);
 
-            return result;
+            _logger.LogDebug("Retrieved {Count} events for user {UserId}", result.Events.Count, userId);
+
+            return new OkObjectResult(result);
         }
 
         [FunctionName("updateEvent")]
@@ -137,7 +140,7 @@ namespace myazfunction.Controllers
             Eventfromdb.Date = Event.Date;
             Eventfromdb.Description = Event.Description;
             Eventfromdb.MarkFinished = Event.MarkFinished;
-           
+
             Eventfromdb.Id = Event.Id;
 
             await _EventsRepository.UpdateEventAsync(Event.Id, Eventfromdb);
@@ -173,7 +176,7 @@ namespace myazfunction.Controllers
             return new OkObjectResult(new { message = "Event deleted successfully" });
         }
 
-        [FunctionName("EventGet")]      
+        [FunctionName("EventGet")]
         public async Task<IActionResult> EventGet(
       [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req)
         {

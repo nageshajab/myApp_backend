@@ -19,7 +19,7 @@ namespace myazfunction.DAL
 
 
 
-        public async Task<OkObjectResult> GetAllEventsAsync(string userid, string searchtxt, int pageNumber, bool showall)
+        public async Task<ReturnValEvents> GetAllEventsAsync(string userid, string searchtxt, int pageNumber, bool showall)
         {
             int pageSize = 10;
             var currentDate = DateTime.Now;
@@ -66,19 +66,19 @@ namespace myazfunction.DAL
                 returnVal.Add(Event);
             }
 
-            var result = new
+            var result = new ReturnValEvents()
             {
                 Events = returnVal,
-                pagination = new
+                Pagination = new Pagination()
                 {
-                    pageNumber,
-                    pageSize,
-                    totalCount,
-                    totalPages
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = totalPages
                 }
             };
 
-            return new OkObjectResult(result);
+            return result;
         }
 
         public async Task<Events> GetEventAsync(string id)
@@ -100,5 +100,17 @@ namespace myazfunction.DAL
         {
             await _Events.DeleteOneAsync(d => d.Id == id);
         }
+    }
+    public class ReturnValEvents
+    {
+        public List<Events> Events { get; set; }
+        public Pagination Pagination { get; set; }
+    }
+    public class Pagination
+    {
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public long TotalCount { get; set; }
+        public int TotalPages { get; set; }
     }
 }
