@@ -17,11 +17,8 @@ namespace myazfunction.DAL
             _Events = context.GetCollection<Events>("Events");
         }
 
-
-
-        public async Task<ReturnValEvents> GetAllEventsAsync(string userid, string searchtxt, int pageNumber, bool showall)
+        public async Task<ReturnValEvents> GetAllEventsAsync(string userid, string searchtxt, int pageNumber, bool showall,int pageSize=10)
         {
-            int pageSize = 10;
             var currentDate = DateTime.Now;
             var fiveDaysAgo = currentDate.AddDays(-5);
             var fiveDaysLater = currentDate.AddDays(5);

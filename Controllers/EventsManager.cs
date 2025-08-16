@@ -88,6 +88,7 @@ namespace myazfunction.Controllers
             string userId = data?.userid;
             string searchText = data?.searchtxt;
             int pageNumber = data?.pageNumber;
+            int pageSize = data.pageSize == null ? 10 : data.pageSize;
             Boolean showall = data?.showAll;
             pageNumber = pageNumber > 0 ? pageNumber : 1;
 
@@ -96,7 +97,7 @@ namespace myazfunction.Controllers
                 return new BadRequestObjectResult("UserId is required.");
             }
 
-            ReturnValEvents result = await _EventsRepository.GetAllEventsAsync(userId, searchText, pageNumber, showall);
+            ReturnValEvents result = await _EventsRepository.GetAllEventsAsync(userId, searchText, pageNumber, showall, pageSize);
 
             _logger.LogDebug("Retrieved {Count} events for user {UserId}", result.Events.Count, userId);
 
