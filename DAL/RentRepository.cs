@@ -114,7 +114,7 @@ namespace myazfunction.DAL
                
             foreach(var tenant in allTenants)
             {
-                if(!tenantsWithRent.Any(c=>c.Id == tenant.Id))
+                if(!tenantsWithRent.Any(c=>c.TenantName == tenant.TenantName))
                     tenantsWithoutRent.Add(tenant);
             }
            
