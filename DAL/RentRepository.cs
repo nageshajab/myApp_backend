@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace myazfunction.DAL
 {
@@ -107,21 +106,17 @@ namespace myazfunction.DAL
             filter = builder.And(filter, remainingAmountFilter);
             
             var rents = await _entries.Find(filter).ToListAsync();
-            var tenantNamesWithRent = rents.Select(r => r.TenantName).Distinct().ToList();
+            var tenantsWithRent = rents.ToList();
 
-            var allTenants = await GetTenantNames(userid);
-            var tenantsWithoutRent = allTenants.Except(tenantNamesWithRent).ToList();
+            var allTenants = await GetAllActiveTenantsAsync(userid);
 
-            // Now tenantsWithoutRent contains the names of tenants who don't have a rent record for the current month
-
-
-            // Get total count for pagination
-            //var totalCount = await _entries.CountDocumentsAsync(filter);
-
-            // Apply pagination
-            //var documents = await _entries
-            //    .Find(filter)
-            //    .ToListAsync();
+            List<Tenant> tenantsWithoutRent = [];
+               
+            foreach(var tenant in allTenants)
+            {
+                if(!tenantsWithRent.Any(c=>c.Id == tenant.Id))
+                    tenantsWithoutRent.Add(tenant);
+            }
            
             var result = new
             {
@@ -163,6 +158,24 @@ namespace myazfunction.DAL
         public async System.Threading.Tasks.Task DeleteRentAsync(string id)
         {
             await _entries.DeleteOneAsync(e => e.Id == id);
+        }
+
+        public async Task<List<Tenant>> GetAllActiveTenantsAsync(string userid)
+        {
+            // Build filter
+            var builder = Builders<Tenant>.Filter;
+            var filter = builder.Eq(p => p.UserId, userid);
+
+            //add active filter 
+            var isActiveFilter = builder.Eq(p => p.IsActive, true);
+            filter = builder.And(filter, isActiveFilter);
+
+            // Apply pagination
+            var documents = await _tenantdb
+                .Find(filter)
+                .ToListAsync();
+
+            return documents;
         }
     }
 }
