@@ -7,7 +7,6 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using myazfunction.DAL;
 using myazfunction.Models;
-using System;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -15,8 +14,8 @@ namespace myazfunction.Controllers
 {
     public class LocalDevHelper
     {
-        private string userid = "687641500069d713a242e626";
-        private string newuserid = "1fcca2c1-ffda-4cc5-b5bd-8959dec8d5af";
+        private string userid = "1fcca2c1-ffda-4cc5-b5bd-8959dec8d5af";
+        private string newuserid = "117642576287732635692";
 
         private readonly DatesRepository _datesRepository;
         private readonly KhataRepository _khataRepository;
@@ -28,8 +27,9 @@ namespace myazfunction.Controllers
         private readonly UserRepository _userRepository;
         private readonly WatchlistRepository _watchlistRepository;
         private readonly EventsRepository _eventsRepository;
+        private readonly MovieRepository _movieRepository;
 
-        public LocalDevHelper(DatesRepository datesRepository, KhataRepository khataRepository, PasswordRepository passwordRepository, RentRepository rentRepository, TaskRepository taskRepository, TenantRepository tenantRepository, TransactionRepository transactionRepository, UserRepository userRepository, WatchlistRepository watchlistRepository, EventsRepository eventsRepository)
+        public LocalDevHelper(DatesRepository datesRepository, KhataRepository khataRepository, PasswordRepository passwordRepository, RentRepository rentRepository, TaskRepository taskRepository, TenantRepository tenantRepository, TransactionRepository transactionRepository, UserRepository userRepository, WatchlistRepository watchlistRepository, EventsRepository eventsRepository, MovieRepository movieRepository)
         {
             _datesRepository = datesRepository;
             _khataRepository = khataRepository;
@@ -41,6 +41,7 @@ namespace myazfunction.Controllers
             _userRepository = userRepository;
             _watchlistRepository = watchlistRepository;
             _eventsRepository = eventsRepository;
+            _movieRepository = movieRepository;
         }
 
         [FunctionName("execute")]
@@ -50,7 +51,7 @@ namespace myazfunction.Controllers
         public async Task<IActionResult> execute(
       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
-            await copyDatesToEvents();
+            await copyMovies();
             //await copyDates();
             //Console.WriteLine("Dates copied..");
             //// await copyKhataData();
@@ -71,6 +72,31 @@ namespace myazfunction.Controllers
             return new OkObjectResult("ok");
         }
 
+        private async System.Threading.Tasks.Task copyMovies()
+        {
+            //copy movies from one user to another
+            var okResult = await _movieRepository.GetAllMoviesAsync(userid, "", "", 1, false);
+            if (okResult != null)
+            {
+                dynamic data = okResult.Value;
+                foreach (Movie movie in data.movies)
+                {
+                    var newMovie= new Movie
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        ImageData = movie.ImageData,
+                        IsJav = movie.IsJav,
+                        tags = movie.tags,
+                        Title = movie.Title,
+                        Url = movie.Url,
+                        UserId = newuserid,  
+                    };
+
+                    await _movieRepository.CreateMovieAsync(newMovie);
+                }
+            }
+        }
+
         private async System.Threading.Tasks.Task copyDatesToEvents()
         {
             //copy dates from one user to another
@@ -84,7 +110,7 @@ namespace myazfunction.Controllers
                     Title = date.Title,
                     Date = date.Date,
                     Description = date.Description,
-                    MarkFinished=false
+                    MarkFinished = false
                 };
 
                 await _eventsRepository.CreateEventAsync(newEvent);
