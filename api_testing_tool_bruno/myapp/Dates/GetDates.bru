@@ -1,0 +1,24 @@
+meta {
+  name: GetDates
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:7018/api/GetDates
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "userid":"68d653e0e566c8f64677d585",
+    "Date":"09/26/2025",
+    "Title":"title1",
+    "pageNumber":0
+  }
+}
+
+settings {
+  encodeUrl: true
+}

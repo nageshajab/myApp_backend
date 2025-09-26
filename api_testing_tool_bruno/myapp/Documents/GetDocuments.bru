@@ -1,0 +1,23 @@
+meta {
+  name: GetDocuments
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:7018/api/GetDocuments
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "userid":"68d653e0e566c8f64677d585",
+    "searchtxt":"",
+    "pageNumber":1
+  }
+}
+
+settings {
+  encodeUrl: true
+}

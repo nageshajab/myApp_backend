@@ -52,12 +52,12 @@ namespace myazfunction.Controllers
 
             if (IsValidUser(newUser) == false)
             {
-                return new BadRequestObjectResult("Invalid password data.");
+                return new BadRequestObjectResult("Invalid request data.");
             }
             
             await _userRepository.CreateUserAsync(newUser);
 
-            return new OkObjectResult(new { message = "Password added successfully", data = newUser });
+            return new OkObjectResult(new { message = "User added successfully", data = newUser });
         }
 
         private bool IsValidUser(Users users)
@@ -178,12 +178,12 @@ namespace myazfunction.Controllers
 
             if (string.IsNullOrEmpty(id))
             {
-                return new BadRequestObjectResult("Password Id is required.");
+                return new BadRequestObjectResult("User Id is required.");
             }
 
             await _userRepository.DeleteUserAsync(id);
 
-            return new OkObjectResult(new { message = "Password deleted successfully" });
+            return new OkObjectResult(new { message = "User deleted successfully" });
 
         }
 

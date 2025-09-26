@@ -1,0 +1,19 @@
+meta {
+  name: DateGet
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:7018/api/DateGet?id=68d66eb7e566c8f64677d588
+  body: json
+  auth: inherit
+}
+
+params:query {
+  id: 68d66eb7e566c8f64677d588
+}
+
+settings {
+  encodeUrl: true
+}

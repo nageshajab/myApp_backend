@@ -1,0 +1,25 @@
+meta {
+  name: updateEvent
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:7018/api/updateEvent
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "Title":"title2",
+    "Description":"Description1",
+    "Date":"09/26/2025",
+    "userid":"68d653e0e566c8f64677d585",
+    "id":"68d67869fb4eab7056794ae8"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

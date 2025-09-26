@@ -1,0 +1,23 @@
+meta {
+  name: UserGet
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:7018/api/UserGet?id=68d653e0e566c8f64677d585
+  body: json
+  auth: none
+}
+
+params:query {
+  id: 68d653e0e566c8f64677d585
+}
+
+body:json {
+  {
+    "Username":"adityaajab",
+    "Email":"adityaajab@gmail.com",
+    "Password":"password"
+  }
+}

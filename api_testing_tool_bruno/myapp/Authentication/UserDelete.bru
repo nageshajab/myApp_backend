@@ -1,0 +1,23 @@
+meta {
+  name: UserDelete
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:7018/api/UserDelete?id=68d63710425a238787fa0824
+  body: json
+  auth: none
+}
+
+params:query {
+  id: 68d63710425a238787fa0824
+}
+
+body:json {
+  {
+    "Username":"adityaajab",
+    "Email":"adityaajab@gmail.com",
+    "Password":"password"
+  }
+}

@@ -1,0 +1,23 @@
+meta {
+  name: SendEmail
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:7018/api/SendEmail
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "ToEmail":"ajab.nagesh@gmail.com",
+    "Subject":"Subject1",
+    "Body":"Body1"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

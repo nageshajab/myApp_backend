@@ -1,0 +1,24 @@
+meta {
+  name: GetEvents
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:7018/api/GetEvents
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "searchText":"",
+    "pageNumber":1,
+    "showAll":false,
+    "userid":"68d653e0e566c8f64677d585"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
