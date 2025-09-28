@@ -174,7 +174,7 @@ namespace myazfunction.Controllers
             return new OkObjectResult(new { message = "Watchlist item deleted successfully" });
         }
 
-        [FunctionName("getwachlistitem")]
+        [FunctionName("GetWatchlistitem")]
         public async Task<IActionResult> GetWatchlistitem(
       [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req)
         {
@@ -195,7 +195,7 @@ namespace myazfunction.Controllers
 
             if (string.IsNullOrEmpty(id))
             {
-                return new BadRequestObjectResult("walistitem Id is required.");
+                return new BadRequestObjectResult("GetWatchlistitem Id is required.");
             }
 
             var tra = await _watchlistRepository.GetWatchlistItemAsync(id);
