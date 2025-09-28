@@ -1,17 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Communication.Email" Version="1.0.1" />
+    <PackageReference Include="Azure.Communication.Email" Version="1.0.2" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.OpenApi" Version="1.5.1" />
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.5.0" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.6.0" />
     <PackageReference Include="MongoDB.Bson" Version="3.5.0" />
-    <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.5.0" />
+    <PackageReference Include="MyAppModels" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
@@ -24,8 +25,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MyAppModels\MyAppModels.csproj" />
   </ItemGroup>
 </Project>

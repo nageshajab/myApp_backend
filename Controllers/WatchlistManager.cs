@@ -83,8 +83,8 @@ namespace myazfunction.Controllers
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            string userId = data?.userid;
-            string searchText = data?.searchtxt;
+            string userId = data?.userId;
+            string searchText = data?.searchText;
             int pageNumber = data?.pageNumber;
             pageNumber = pageNumber > 0 ? pageNumber : 1;
 
