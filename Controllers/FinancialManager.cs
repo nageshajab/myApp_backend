@@ -82,6 +82,7 @@ namespace myazfunction.Controllers
 
             financialstatusfromdb.KotakBankFdAmount = financialstatus.KotakBankFdAmount;
             financialstatusfromdb.KotakBankSavingsAccountBalance = financialstatus.KotakBankSavingsAccountBalance;
+            financialstatusfromdb.SriramFD=financialstatus.SriramFD;
 
             financialstatusfromdb.Id = financialstatus.Id;
 

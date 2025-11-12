@@ -7,6 +7,8 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
 using myazfunction.DAL;
 using myazfunction.Models;
+using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -15,7 +17,7 @@ namespace myazfunction.Controllers
     public class LocalDevHelper
     {
         private string userid = "1fcca2c1-ffda-4cc5-b5bd-8959dec8d5af";
-        private string newuserid = "117642576287732635692";
+        private string newuserid = "687641500069d713a242e626";
 
         private readonly DatesRepository _datesRepository;
         private readonly KhataRepository _khataRepository;
@@ -28,8 +30,9 @@ namespace myazfunction.Controllers
         private readonly WatchlistRepository _watchlistRepository;
         private readonly EventsRepository _eventsRepository;
         private readonly MovieRepository _movieRepository;
+        private readonly BloodSugarRepository _bloodSugarRepository;
 
-        public LocalDevHelper(DatesRepository datesRepository, KhataRepository khataRepository, PasswordRepository passwordRepository, RentRepository rentRepository, TaskRepository taskRepository, TenantRepository tenantRepository, TransactionRepository transactionRepository, UserRepository userRepository, WatchlistRepository watchlistRepository, EventsRepository eventsRepository, MovieRepository movieRepository)
+        public LocalDevHelper(DatesRepository datesRepository, KhataRepository khataRepository, PasswordRepository passwordRepository, RentRepository rentRepository, TaskRepository taskRepository, TenantRepository tenantRepository, TransactionRepository transactionRepository, UserRepository userRepository, WatchlistRepository watchlistRepository, EventsRepository eventsRepository, MovieRepository movieRepository, BloodSugarRepository bloodSugarRepository)
         {
             _datesRepository = datesRepository;
             _khataRepository = khataRepository;
@@ -42,6 +45,7 @@ namespace myazfunction.Controllers
             _watchlistRepository = watchlistRepository;
             _eventsRepository = eventsRepository;
             _movieRepository = movieRepository;
+            _bloodSugarRepository = bloodSugarRepository;
         }
 
         [FunctionName("execute")]
@@ -51,23 +55,26 @@ namespace myazfunction.Controllers
         public async Task<IActionResult> execute(
       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
-            await copyMovies();
-            //await copyDates();
-            //Console.WriteLine("Dates copied..");
-            //// await copyKhataData();
-            //Console.WriteLine("Khata data copied..");
-            //// await copyPasswordData();
-            //Console.WriteLine("Password data copied..");
-            //await copyRentData();
-            //Console.WriteLine("rent data copied");
-            //await copyTaskData();
-            //Console.WriteLine("Task data copied..");
-            //await copyTenantData();
-            //Console.WriteLine("tenant data copied..");
-            //await copyTransactionData();
-            //Console.WriteLine("Transaction data copied..");
-            //await copyWatchlistData();
-            //Console.WriteLine("Watchlist data copied..");
+            await importBloodSugars();
+            return new OkObjectResult("ok");
+
+            //await copyMovies();
+            await copyDates();
+            Console.WriteLine("Dates copied..");
+             await copyKhataData();
+            Console.WriteLine("Khata data copied..");
+            // await copyPasswordData();
+            Console.WriteLine("Password data copied..");
+            await copyRentData();
+            Console.WriteLine("rent data copied");
+            await copyTaskData();
+            Console.WriteLine("Task data copied..");
+            await copyTenantData();
+            Console.WriteLine("tenant data copied..");
+            await copyTransactionData();
+            Console.WriteLine("Transaction data copied..");
+            await copyWatchlistData();
+            Console.WriteLine("Watchlist data copied..");
 
             return new OkObjectResult("ok");
         }
@@ -117,6 +124,31 @@ namespace myazfunction.Controllers
             }
         }
 
+        private async System.Threading.Tasks.Task importBloodSugars()
+        {
+            string datepart="";
+
+            var data=File.ReadAllLines("sugar.csv");
+            int lineno = 0;
+            foreach (var line in data)
+            {
+                if (lineno==0)
+                {
+                    lineno++;
+                    continue; //skip header
+                }
+                var parts = line.Split(',');
+                BloodSugar bs = new BloodSugar();
+                bs.Id = ObjectId.GenerateNewId().ToString();
+                bs.UserId = userid;
+                datepart = parts[0] + parts[1];
+                bs.DateTime = DateTime.Parse(datepart).ToUniversalTime();
+                bs.Fasting = int.Parse(parts[3]);
+                bs.PP = int.Parse(parts[3]);
+                
+             //   await _bloodSugarRepository.CreateAsync(bs);
+            }          
+        }
         private async System.Threading.Tasks.Task copyDates()
         {
             //copy dates from one user to another

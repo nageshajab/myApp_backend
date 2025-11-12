@@ -12,19 +12,19 @@ using System.Threading.Tasks;
 
 namespace myazfunction.Controllers
 {
-    public class WatchlistManager
+    public class BloodSugarManager
     {
-        private readonly ILogger<WatchlistManager> _logger;
-        private readonly WatchlistRepository _watchlistRepository ;
+        private readonly ILogger<BloodSugarManager> _logger;
+        private readonly BloodSugarRepository _bloodSugarRepository;
 
-        public WatchlistManager(ILogger<WatchlistManager> log, WatchlistRepository watchlistRepository)
+        public BloodSugarManager(ILogger<BloodSugarManager> log, BloodSugarRepository bloodSugarRepository)
         {
             _logger = log;
-            _watchlistRepository = watchlistRepository;
+            _bloodSugarRepository =bloodSugarRepository;
         }
 
-        [FunctionName("createWatchlistItem")]
-        public async Task<IActionResult> createWatchlistItem(
+        [FunctionName("createBloodSugar")]
+        public async Task<IActionResult> CreateBloodSugar(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
@@ -41,30 +41,32 @@ namespace myazfunction.Controllers
             }
 
             string UserId = req.Query["UserId"];
+
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
-           Watchlist watchlist = JsonConvert.DeserializeObject<Watchlist>(requestBody);
+            BloodSugar newBs = JsonConvert.DeserializeObject<BloodSugar>(requestBody);
+            
+            newBs.DateTime = newBs.DateTime.ToUniversalTime();
 
-            if (IsValid(watchlist) == false)
+            if (IsValidDate(newBs) == false)
             {
-                return new BadRequestObjectResult("Invalid data.");
+                return new BadRequestObjectResult("Invalid dates data.");
             }
-            watchlist.Date = watchlist.Date.ToUniversalTime();
-            await _watchlistRepository.CreateWatchlistEntryAsync(watchlist);
 
-            return new OkObjectResult(new { message = "Watchlist item added successfully", data = watchlist });
+            await _bloodSugarRepository.CreateAsync(newBs);
+
+            return new OkObjectResult(new { message = "Added successfully", data = newBs });
         }
 
-        private bool IsValid(Watchlist tra)
+        private bool IsValidDate(BloodSugar dates)
         {
-            return tra != null &&
-                   !string.IsNullOrWhiteSpace(tra.Title) &&
-                   !tra.Date.Equals(DateTime.MinValue) 
-                  ;
+            return dates != null &&
+                   dates.DateTime!=DateTime.MinValue &&
+                   !string.IsNullOrWhiteSpace(dates.UserId) ;
         }
 
-        [FunctionName("GetWatchlistItems")]
-        public async Task<IActionResult> GetWatchlistItems(
+        [FunctionName("Get")]
+        public async Task<IActionResult> Get(
        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
        ILogger log)
         {
@@ -83,8 +85,8 @@ namespace myazfunction.Controllers
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            string userId = data?.userId;
-            string searchText = data?.searchText;
+            string userId = data?.userid;
+            string searchText = data?.searchtxt;
             int pageNumber = data?.pageNumber;
             pageNumber = pageNumber > 0 ? pageNumber : 1;
 
@@ -93,13 +95,13 @@ namespace myazfunction.Controllers
                 return new BadRequestObjectResult("UserId is required.");
             }
 
-            var result = await _watchlistRepository.GetAllWatchlistEntriesAsync(userId, searchText, pageNumber);
+            var result = await _bloodSugarRepository.GetAllAsync(userId, searchText, pageNumber);
 
             return result;
         }
 
-        [FunctionName("updateWatchlistItem")]
-        public async Task<IActionResult> updateWatchlistItem(
+        [FunctionName("updateBloodSugar")]
+        public async Task<IActionResult> updateBloodSugar(
       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
@@ -116,39 +118,36 @@ namespace myazfunction.Controllers
 
             // Read and deserialize the request body
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            Watchlist watchlist= JsonConvert.DeserializeObject<Watchlist>(requestBody);
+            BloodSugar date = JsonConvert.DeserializeObject<BloodSugar>(requestBody);
 
             // Validate the object
-            if (!IsValid(watchlist))
+            if (!IsValidDate(date))
             {
-                return new BadRequestObjectResult("Invalid watchlist item");
+                return new BadRequestObjectResult("Invalid data ");
             }
-            watchlist.Date = watchlist.Date.ToUniversalTime(); // Convert to universal time
-            var watchlistitemfromdb = await _watchlistRepository.GetWatchlistItemAsync(watchlist.Id);
 
-            if (watchlistitemfromdb== null)
+            date.DateTime = date.DateTime.ToUniversalTime();//convert to UTC
+
+            var datefromdb = await _bloodSugarRepository.GetAsync(date.Id);
+
+            if (datefromdb == null)
             {
-                return new NotFoundObjectResult("watchlist item not found.");
+                return new NotFoundObjectResult("date not found.");
             }
-            watchlistitemfromdb.Id = watchlist.Id;
-            watchlistitemfromdb.Title = watchlist.Title;
-            watchlistitemfromdb.Description = watchlist.Description;
-            watchlistitemfromdb.Date = watchlist.Date;
-            watchlistitemfromdb.Status = watchlist.Status;
-            watchlistitemfromdb.UserId = watchlist.UserId;
-            watchlistitemfromdb.Type= watchlist.Type;
-            watchlistitemfromdb.Language= watchlist.Language;
-            watchlistitemfromdb.Genre = watchlist.Genre;
-            watchlistitemfromdb.Rating = watchlist.Rating;
-            watchlistitemfromdb.Ott = watchlist.Ott;
+            datefromdb.UserId = date.UserId;
+            datefromdb.DateTime = date.DateTime;
+            datefromdb.Fasting= date.Fasting;
+            datefromdb.PP= date.PP;
+            datefromdb.Id = date.Id;
 
-            await _watchlistRepository.UpdateWatchlistItemAsync(watchlist.Id, watchlistitemfromdb);
+            await _bloodSugarRepository.UpdateAsync(date.Id, datefromdb);
 
-            return new OkObjectResult(new { message = "watchlist item updated successfully" });
+            return new OkObjectResult(new { message = "Updated successfully" });
         }
 
-        [FunctionName("DeleteWatchlistitem")]
-        public async Task<IActionResult> DeleteWatchlistitem(
+
+        [FunctionName("bloodSugarDelete")]
+        public async Task<IActionResult> bloodSugarDelete(
       [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request to delete a password.");
@@ -162,21 +161,20 @@ namespace myazfunction.Controllers
             {
                 return new OkResult(); // No body needed for preflight
             }
-
             string id = req.Query["id"];
 
             if (string.IsNullOrEmpty(id))
             {
-                return new BadRequestObjectResult(" Id is required.");
+                return new BadRequestObjectResult("Id is required.");
             }
 
-            await _watchlistRepository.DeleteWatchlistItemAsync(id);
+            await _bloodSugarRepository.DeleteAsync(id);
 
-            return new OkObjectResult(new { message = "Watchlist item deleted successfully" });
+            return new OkObjectResult(new { message = "Deleted successfully" });
         }
 
-        [FunctionName("GetWatchlistitem")]
-        public async Task<IActionResult> GetWatchlistitem(
+        [FunctionName("GetBloodSugar")]      
+        public async Task<IActionResult> GetBloodSugar(
       [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req)
         {
 
@@ -196,12 +194,12 @@ namespace myazfunction.Controllers
 
             if (string.IsNullOrEmpty(id))
             {
-                return new BadRequestObjectResult("GetWatchlistitem Id is required.");
+                return new BadRequestObjectResult("Id is required.");
             }
 
-            var tra = await _watchlistRepository.GetWatchlistItemAsync(id);
+            var date = await _bloodSugarRepository.GetAsync(id);
             
-            return new OkObjectResult(tra);
+            return new OkObjectResult(date);
         }
     }
 }

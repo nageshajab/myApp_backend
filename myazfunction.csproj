@@ -12,9 +12,12 @@
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.6.0" />
     <PackageReference Include="MongoDB.Bson" Version="3.5.0" />
     <PackageReference Include="MongoDB.Driver" Version="3.5.0" />
-    <PackageReference Include="MyAppModels" Version="1.0.1" />
+    <PackageReference Include="MyAppModels" Version="1.0.4" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="sugar.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -58,6 +58,7 @@ namespace myazfunction.DAL
                 Watchlist khata = new Watchlist();
                 khata.Id = dt.Id;
                 khata.Title = dt.Title;
+                khata.Description = dt.Description;
                 khata.Date = dt.Date;
                 khata.Status = dt.Status;
                 khata.UserId = dt.UserId;
